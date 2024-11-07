@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">MasterProject</string>
+    <string name="header_app">Hello, This is program for getting a simple analytic for trending</string>
+    <string name="exchange_rate">Exchange rate</string>
+    <string name="forecast_from_gpt">Forecast from GPT</string>
+    <string name="data_store">Data store</string>
+    <string name="setting">Setting</string>
 </resources>
