@@ -1,104 +1,79 @@
 package com.example.masterproject
 
-import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
+import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material.ripple.rememberRipple
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import com.example.masterproject.screens.ExchangeRateRoute
+import com.example.masterproject.screens.LocalNavController
+import com.example.masterproject.screens.MainRoute
+import com.example.masterproject.screens.AppSettingRoute
+import com.example.masterproject.screens.EditRoute
+import com.example.masterproject.screens.SettingRoute
+import com.example.masterproject.screens.StorageRoute
+import com.example.masterproject.screens.datastore.StorageScreen
+import com.example.masterproject.screens.exchangerate.edititem.EditItemScreen
+import com.example.masterproject.screens.exchangerate.ExchangeRateScreen
+import com.example.masterproject.screens.mainscreen.MainScreen
+import com.example.masterproject.screens.setting.InnerSettingScreen
+import com.example.masterproject.screens.setting.SettingScreen
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
         setContent {
-            MainScreen()
+            ExcApp()
         }
     }
 }
 
-@Preview(showSystemUi = true)
 @Composable
-fun MainScreen(){
-    Column(
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.fillMaxSize()
+fun ExcApp(){
+    val navController = rememberNavController()
+    var title by rememberSaveable { mutableStateOf("") }
 
+    CompositionLocalProvider(
+        LocalNavController provides navController
     ) {
-        Text(
-            text = stringResource(R.string.header_app),
-            fontSize = 25.sp,
-            textAlign = TextAlign.Center,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(bottom = 200.dp)
+        NavHost(
+            navController = navController,
+            startDestination = MainRoute,
+            modifier = Modifier.fillMaxSize()
         )
-        Text(
-            text = stringResource(R.string.exchange_rate),
-            fontSize = 25.sp,
-            textDecoration = TextDecoration.Underline,
-            modifier = Modifier.padding(30.dp)
-                .clickable(
-                    onClick = {
-
-                    },
-                    interactionSource = MutableInteractionSource(),
-                    indication = rememberRipple()
-                )
-        )
-        Text(
-            text = stringResource(R.string.forecast_from_gpt),
-            fontSize = 25.sp,
-            textDecoration = TextDecoration.Underline,
-            modifier = Modifier.padding(30.dp)
-                .clickable(
-                    onClick = {
-
-                    },
-                    interactionSource = MutableInteractionSource(),
-                    indication = rememberRipple()
-                )
-        )
-        Text(
-            text = stringResource(R.string.data_store),
-            fontSize = 25.sp,
-            textDecoration = TextDecoration.Underline,
-            modifier = Modifier.padding(30.dp)
-                .clickable(
-                    onClick = {
-
-                    },
-                    interactionSource = MutableInteractionSource(),
-                    indication = rememberRipple()
-                )
-        )
-        Text(
-            text = stringResource(R.string.setting),
-            fontSize = 25.sp,
-            textDecoration = TextDecoration.Underline,
-            modifier = Modifier.padding(30.dp)
-                .clickable(
-                    onClick = {
-
-                    },
-                    interactionSource = MutableInteractionSource(),
-                    indication = rememberRipple()
-                )
-        )
+        {
+            composable(MainRoute) { MainScreen() }
+            composable(ExchangeRateRoute) { ExchangeRateScreen(returnTitle = {string -> title = string}) }
+            composable(StorageRoute) { StorageScreen() }
+            composable(AppSettingRoute) { SettingScreen() }
+            composable(EditRoute) { EditItemScreen() }
+            composable(SettingRoute) { InnerSettingScreen {
+                //TODO
+                }
+            }
+        }
     }
 }
+
+
+@Composable
+@Preview(showSystemUi = true)
+fun ExcAppPreview(){
+    ExcApp()
+}
+
