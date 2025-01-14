@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.fir.expressions.FirEmptyArgumentList.arguments
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -5,6 +7,7 @@ plugins {
 
     alias(libs.plugins.hilt)
     alias(libs.plugins.ksp)
+    alias(libs.plugins.kotlin.serialization)
 }
 
 android {
@@ -30,6 +33,7 @@ android {
             )
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
@@ -47,9 +51,14 @@ dependencies {
 
     implementation(libs.hilt)
     ksp(libs.hilt.compiler)
+    ksp(libs.room.compiler)
     implementation(libs.hilt.compose)
     implementation(libs.retrofit2)
     implementation(libs.converter.gcon)
+    implementation(libs.kotlinx.serializaion.core)
+    implementation(libs.kotlinx.collections.immutable)
+    implementation(libs.room.runtime)
+    implementation(libs.room.ktx)
 
     implementation(libs.material3)
     implementation(libs.nav.compose)

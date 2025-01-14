@@ -1,15 +1,15 @@
 package com.example.masterproject.model
 
 import android.content.Context
-import com.example.masterproject.screens.tools.baseSecondCoin
-import com.example.masterproject.screens.tools.cryptoCoins
-import com.example.masterproject.screens.tools.sourceNames
+import com.example.masterproject.model.entities.PairCoinWithPrice
+import com.example.masterproject.ui.tools.baseSecondCoin
+import com.example.masterproject.ui.tools.cryptoCoins
+import com.example.masterproject.ui.tools.sourceNames
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import okhttp3.Call
@@ -28,7 +28,7 @@ import kotlin.random.Random
 class PairCoinsRepository @Inject constructor(
     @ApplicationContext private val context: Context
 ){
-    private val _listCoins: MutableStateFlow<List<PairCoin>> = MutableStateFlow(
+    /*private val _listCoins: MutableStateFlow<List<PairCoin>> = MutableStateFlow(
         List(cryptoCoins.size) { index ->
             val coinList = cryptoCoins
             val secondCoin = baseSecondCoin
@@ -40,9 +40,36 @@ class PairCoinsRepository @Inject constructor(
                 price = -1.0 // Default price
             )
         }
-    )
+    )*/
 
-    fun getPairList(): StateFlow<List<PairCoin>> = _listCoins
+    private var _listCoins: MutableStateFlow<List<PairCoinWithPrice>> = MutableStateFlow(
+        emptyList()
+    )
+    
+    init {
+        _listCoins = MutableStateFlow(
+            List(cryptoCoins.size) { index ->
+                val coinList = cryptoCoins
+                val secondCoin = baseSecondCoin
+                val pair = unitCoinsInPair(coinList[index], secondCoin)
+                PairCoinWithPrice(
+                    id = index.toLong() + 1,
+                    pair = pair,
+                    sourceName = getRandomSourceName(),
+                    price = -1.0 // Default price
+                )
+            }
+        )
+    }
+
+    fun getPairList(): Flow<List<PairCoinWithPrice>> = _listCoins
+    //fun getPairList(): StateFlow<List<PairCoin>> = _listCoins
+
+    fun getIdForPair(pair: String): Long{
+        val pairCoin = _listCoins.value.filter { it.pair == pair }
+
+        return if (pairCoin.isNotEmpty()) pairCoin[0].id else -1
+    }
 
     suspend fun removePairFromList(id: Long){
         //TODO Remove pair from DB
@@ -57,7 +84,7 @@ class PairCoinsRepository @Inject constructor(
 
         val id = _listCoins.value.size.toLong()
         val sourceName = "Binance"
-        _listCoins.update { it + PairCoin(id = id, pair = pair, sourceName = sourceName, price = -1.0) }
+        _listCoins.update { it + PairCoinWithPrice(id = id, pair = pair, sourceName = sourceName, price = -1.0) }
     }
 
     suspend fun getInfoForPair(id: Long, time:Int){
@@ -72,7 +99,7 @@ class PairCoinsRepository @Inject constructor(
         return list[Random.nextInt(list.size)]
     }
 
-    private fun unitCoinInPair(coin1: String, coin2: String): String{
+    private fun unitCoinsInPair(coin1: String, coin2: String): String{
         return coin1+coin2
     }
 
