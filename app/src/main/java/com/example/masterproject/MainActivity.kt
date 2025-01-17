@@ -27,7 +27,7 @@ import com.example.masterproject.ui.screens.AppSettingGraphs.AppSettingRoute
 import com.example.masterproject.ui.screens.LocalNavController
 import com.example.masterproject.ui.screens.SettingRoute
 import com.example.masterproject.ui.screens.storage.StorageScreen
-import com.example.masterproject.ui.screens.exchangerate.edititem.EditItemScreen
+import com.example.masterproject.ui.screens.exchangerate.editmenu.EditItemScreen
 import com.example.masterproject.ui.screens.exchangerate.ExchangeRateScreen
 import com.example.masterproject.ui.screens.mainscreen.MainScreen
 import com.example.masterproject.ui.screens.setting.InnerSettingScreen

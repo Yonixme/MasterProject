@@ -1,4 +1,4 @@
-package com.example.masterproject.ui.screens.exchangerate.edititem
+package com.example.masterproject.ui.screens.exchangerate.editmenu
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -32,9 +32,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.masterproject.R
 import com.example.masterproject.ui.screens.EventConsumer
 import com.example.masterproject.ui.screens.LocalNavController
-import com.example.masterproject.ui.screens.exchangerate.edititem.EditItemViewModel.ScreenState
+import com.example.masterproject.ui.screens.exchangerate.editmenu.EditItemViewModel.ScreenState
 import com.example.masterproject.ui.components.CustomButton
-import com.example.masterproject.ui.screens.ExchangeRateGraphs
 import com.example.masterproject.ui.screens.ExchangeRateGraphs.EditRoute
 import com.example.masterproject.ui.screens.NavigateUpAction
 import com.example.masterproject.ui.screens.routeClass

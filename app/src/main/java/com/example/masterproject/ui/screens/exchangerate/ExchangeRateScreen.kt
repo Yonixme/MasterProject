@@ -34,7 +34,6 @@ import com.example.masterproject.R
 import com.example.masterproject.ui.screens.LocalNavController
 import com.example.masterproject.ui.screens.exchangerate.ExchangeRateViewModel.*
 import com.example.masterproject.ui.components.CustomButton
-import com.example.masterproject.ui.screens.ExchangeRateGraphs
 import com.example.masterproject.ui.screens.ExchangeRateGraphs.EditRoute
 import com.example.masterproject.ui.screens.MainGraph
 import com.example.masterproject.ui.screens.NavigateUpAction
@@ -44,7 +43,8 @@ import com.example.masterproject.ui.screens.NavigateUpAction
 fun ExchangeRateScreenPreview(){
     ExchangeRateContent(
         onEditItemListScreen = { },
-        getScreenState = { ScreenState.Loading })
+        getScreenState = { ScreenState.Loading },
+        onSaveClicked = { })
 }
 
 @Composable
@@ -72,7 +72,8 @@ fun ExchangeRateScreen(
 
     ExchangeRateContent(
         getScreenState = {screenState.value},
-        onEditItemListScreen = { navController.navigate(EditRoute)}
+        onEditItemListScreen = { navController.navigate(EditRoute)},
+        onSaveClicked = { viewModel.saveMarketSnapshot() }
     )
 
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -95,10 +96,10 @@ fun ExchangeRateScreen(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ExchangeRateContent(getScreenState: () -> ScreenState,
-                        onEditItemListScreen: () -> Unit) {
+                        onEditItemListScreen: () -> Unit,
+                        onSaveClicked: () -> Unit) {
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -131,7 +132,7 @@ fun ExchangeRateContent(getScreenState: () -> ScreenState,
                                     verticalAlignment = Alignment.CenterVertically
                                 ){
                                     Text(
-                                        text = it.pair,
+                                        text = it.tradePair,
                                         modifier = Modifier,
                                         fontSize = 25.sp
                                     )
@@ -151,7 +152,7 @@ fun ExchangeRateContent(getScreenState: () -> ScreenState,
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceEvenly
             ){
-                CustomButton(stringResource(R.string.save)) { }
+                CustomButton(stringResource(R.string.save)) { onSaveClicked.invoke()}
                 CustomButton(stringResource(R.string.edit)) { onEditItemListScreen.invoke() }
             }
         }

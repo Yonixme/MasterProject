@@ -44,7 +44,11 @@ android {
     buildFeatures {
         compose = true
     }
-    buildToolsVersion = "34.0.0"
+
+    ksp {
+        arg("room.schemaLocation", "$projectDir/schemas")
+    }
+
 }
 
 dependencies {
