@@ -1,5 +1,6 @@
 package com.example.masterproject.ui.screens.storage
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,15 +14,21 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.example.masterproject.R
 import com.example.masterproject.model.marketsnapshot.entities.MarketPairsWithDetailsSnapshot
 import com.example.masterproject.ui.screens.LocalNavController
@@ -46,21 +53,41 @@ fun StorageScreen(
     returnTitle: (Int) -> Unit,
     returnNavigateUpAction: (NavigateUpAction) -> Unit
 ){
+    val currentReturnTitle = rememberUpdatedState(returnTitle)
+    val currentReturnNavigateUpAction = rememberUpdatedState(returnNavigateUpAction)
     val viewModel: StorageScreenViewModel = hiltViewModel()
     val navController = LocalNavController.current
     val screenState = viewModel.stateFlow.collectAsState()
+    val context = LocalContext.current
+    val lifecycleOwner = LocalLifecycleOwner.current
 
-    LaunchedEffect(Unit) {
-        returnTitle.invoke(R.string.storage)
-        returnNavigateUpAction.invoke(
-            NavigateUpAction.VisibleNavigateAndAction(
-                onNavigateButtonPressed = { navController.navigate(MainGraph){
-                    popUpTo(MainGraph){
-                        inclusive = true
-                    }
-                } },
-                onActionButtonPressed = { }
-            ))
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            when (event) {
+                Lifecycle.Event.ON_CREATE -> {
+                    currentReturnTitle.value.invoke(R.string.storage)
+                    currentReturnNavigateUpAction.value.invoke(
+                        NavigateUpAction.VisibleNavigateAndAction(
+                            onNavigateButtonPressed = { navController.navigate(MainGraph){
+                                popUpTo(0) { inclusive = true }
+                                restoreState = true
+                            } },
+                            onActionButtonPressed = {
+                                Toast.makeText(context,
+                                    context.getString(R.string.feature_in_planning),
+                                    Toast.LENGTH_LONG)
+                                    .show()
+                            }
+                        ))
+                }
+                else -> {}
+            }
+        }
+
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
     }
 
     StorageContent(

@@ -5,7 +5,7 @@ import com.example.masterproject.model.marketpair.entities.MarketPair
 import kotlinx.coroutines.flow.Flow
 
 interface DBMarketPairRepository {
-    fun getAllMarketPairs(sourceName: String): Flow<List<MarketPairDbEntity?>>
+    fun getAllMarketPairs(): Flow<List<MarketPairDbEntity?>>
 
     suspend fun deleteMarketPair(id: Long)
 

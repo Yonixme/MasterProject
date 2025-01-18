@@ -22,4 +22,6 @@
     <string name="delete">Delete</string>
     <string name="add">Add</string>
     <string name="exchange_rate_short">Exch Rate</string>
+    <string name="init_name_value_screen"> </string>
+    <string name="feature_in_planning">This feature will be added in a future patch.</string>
 </resources>

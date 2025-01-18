@@ -14,7 +14,7 @@ class RoomMarketPairRepository @Inject constructor(
     @IoDispatcher private val ioDispatcher: CoroutineDispatcher
 ) : DBMarketPairRepository
 {
-    override fun getAllMarketPairs(sourceName: String): Flow<List<MarketPairDbEntity?>> = marketPairDao.getAllMarketPairs()
+    override fun getAllMarketPairs(): Flow<List<MarketPairDbEntity?>> = marketPairDao.getAllMarketPairs()
 
     override suspend fun deleteMarketPair(id: Long) {
         marketPairDao.deletePairById(id)

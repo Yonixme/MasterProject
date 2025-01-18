@@ -3,6 +3,7 @@ package com.example.masterproject.model.modules
 import android.content.Context
 import androidx.room.Room
 import com.example.masterproject.model.database.AppDatabase
+import com.example.masterproject.model.database.DatabaseConfig
 import com.example.masterproject.model.marketpair.database.MarketPairDao
 import com.example.masterproject.model.marketsnapshot.database.MarketSnapshotDao
 import dagger.Module
@@ -19,7 +20,7 @@ object DatabaseModule {
     @Provides
     @Singleton
     fun provideDatabase(@ApplicationContext context: Context): AppDatabase {
-        return Room.databaseBuilder(context, AppDatabase::class.java, "db1")
+        return Room.databaseBuilder(context, AppDatabase::class.java, DatabaseConfig.DATABASE_NAME)
             .createFromAsset("basedb.db")
             .build()
     }

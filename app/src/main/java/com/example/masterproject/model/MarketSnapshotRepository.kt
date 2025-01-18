@@ -1,14 +1,13 @@
 package com.example.masterproject.model
 
 import com.example.masterproject.model.database.DBRepositories
-import com.example.masterproject.model.marketsnapshot.entities.MarketSnapshotAndDetailsNew
+import com.example.masterproject.model.marketsnapshot.entities.MarketSnapshotAndDetails
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -19,7 +18,7 @@ class MarketSnapshotRepository @Inject constructor(
 ) {
     private val customScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
-    private val _listMarketSnapshotDetails: MutableStateFlow<List<MarketSnapshotAndDetailsNew>> = MutableStateFlow(
+    private val _listMarketSnapshotDetails: MutableStateFlow<List<MarketSnapshotAndDetails>> = MutableStateFlow(
         emptyList()
     )
 
@@ -31,10 +30,10 @@ class MarketSnapshotRepository @Inject constructor(
         }
     }
 
-    fun geListMarketSnapshotDetails(): Flow<List<MarketSnapshotAndDetailsNew>> = _listMarketSnapshotDetails
+    fun geListMarketSnapshotDetails(): Flow<List<MarketSnapshotAndDetails>> = _listMarketSnapshotDetails
 
 
-    private fun queryMarketSnapshotDetails(): Flow<List<MarketSnapshotAndDetailsNew>> {
+    private fun queryMarketSnapshotDetails(): Flow<List<MarketSnapshotAndDetails>> {
         return dbRepositories.roomMarketSnapshotRepository.getMarketSnapshotAndDetails()
 
     }

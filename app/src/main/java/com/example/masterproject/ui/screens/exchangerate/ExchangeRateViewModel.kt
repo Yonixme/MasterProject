@@ -35,6 +35,7 @@ class ExchangeRateViewModel @Inject constructor(
     }
 
     fun startUpdatingCoinPrice() {
+        if(isUpdatingData) return
         isUpdatingData = true
         viewModelScope.launch(Dispatchers.IO) {
             while (isUpdatingData){

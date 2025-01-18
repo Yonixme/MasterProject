@@ -24,6 +24,13 @@ interface MarketSnapshotDao {
 
 
 
+    @Query("SELECT * FROM market_snapshots")
+    fun getFlowSnapshots(): Flow<MarketSnapshotDbEntity>
+
+    @Insert
+    suspend fun setDetailsForMarketSnapshot1(list: List<MarketSnapshotDetailsDbEntity>)
+
+
 
 
 //    @Insert

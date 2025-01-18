@@ -1,4 +1,4 @@
-package com.example.masterproject.ui.screens.setting
+package com.example.masterproject.ui.screens.setting.innersetting
 
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement

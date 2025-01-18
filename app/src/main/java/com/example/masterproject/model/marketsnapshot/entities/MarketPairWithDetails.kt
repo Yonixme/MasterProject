@@ -5,17 +5,7 @@ data class MarketSnapshot(
     val time: Long,
 )
 
-data class MarketPairsWithDetailsSnapshot(
-    val id: Long,
-    val time: Long,
-    val tradePairs: List<String>,
-    val prices: List<Double>,
-    val sourceName: List<String>
-)
-
-
-
-data class MarketSnapshotAndDetailsNew(
+data class MarketSnapshotAndDetails(
     val marketSnapshot: MarketSnapshot,
     val tradePairs: List<String>,
     val sourceNames: List<String>,
@@ -23,6 +13,13 @@ data class MarketSnapshotAndDetailsNew(
 )
 
 
+data class MarketPairsWithDetailsSnapshot(
+    val id: Long,
+    val time: Long,
+    val tradePairs: List<String>,
+    val prices: List<Double>,
+    val sourceName: List<String>
+)
 
 //data class MarketSnapshotDetails(
 //    val snapshotID: Long,

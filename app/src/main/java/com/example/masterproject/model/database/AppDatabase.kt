@@ -19,3 +19,7 @@ abstract class AppDatabase : RoomDatabase() {
 
     abstract fun marketSnapshotDao(): MarketSnapshotDao
 }
+
+object DatabaseConfig {
+    const val DATABASE_NAME = "db"
+}

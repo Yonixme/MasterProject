@@ -10,6 +10,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -30,7 +31,7 @@ import com.example.masterproject.ui.screens.storage.StorageScreen
 import com.example.masterproject.ui.screens.exchangerate.editmenu.EditItemScreen
 import com.example.masterproject.ui.screens.exchangerate.ExchangeRateScreen
 import com.example.masterproject.ui.screens.mainscreen.MainScreen
-import com.example.masterproject.ui.screens.setting.InnerSettingScreen
+import com.example.masterproject.ui.screens.setting.innersetting.InnerSettingScreen
 import com.example.masterproject.ui.screens.setting.SettingScreen
 import com.example.masterproject.ui.screens.AppToolBar
 import com.example.masterproject.ui.screens.ExchangeRateGraphs
@@ -59,13 +60,8 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun ExcApp(){
     val navController = rememberNavController()
-    var titleRes by rememberSaveable { mutableStateOf(R.string.app_name) }
-    var navigateUpAction: NavigateUpAction by remember { mutableStateOf(
-        NavigateUpAction.VisibleNavigateAndAction(
-            onNavigateButtonPressed = { },
-            onActionButtonPressed = { }
-        )
-    ) }
+    var titleRes by rememberSaveable { mutableIntStateOf(R.string.init_name_value_screen) }
+    var navigateUpAction: NavigateUpAction by remember { mutableStateOf(NavigateUpAction.Hidden) }
 
     Scaffold (
         topBar = { AppToolBar(titleRes = titleRes, navigateUpAction = navigateUpAction) },
@@ -130,8 +126,6 @@ fun ExcApp(){
                         }
                     ) }
                 }
-
-
 
                 composable<SettingRoute> { InnerSettingScreen {
                     //TODO

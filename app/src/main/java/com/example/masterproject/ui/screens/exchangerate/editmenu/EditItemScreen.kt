@@ -16,10 +16,12 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -29,12 +31,16 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.example.masterproject.R
 import com.example.masterproject.ui.screens.EventConsumer
 import com.example.masterproject.ui.screens.LocalNavController
 import com.example.masterproject.ui.screens.exchangerate.editmenu.EditItemViewModel.ScreenState
 import com.example.masterproject.ui.components.CustomButton
 import com.example.masterproject.ui.screens.ExchangeRateGraphs.EditRoute
+import com.example.masterproject.ui.screens.MainGraph
 import com.example.masterproject.ui.screens.NavigateUpAction
 import com.example.masterproject.ui.screens.routeClass
 
@@ -54,16 +60,41 @@ fun EditItemScreen(
     returnTitle: (Int) -> Unit,
     returnNavigateUpAction: (NavigateUpAction) -> Unit
 ){
+    val currentReturnTitle = rememberUpdatedState(returnTitle)
+    val currentReturnNavigateUpAction = rememberUpdatedState(returnNavigateUpAction)
     val viewModel: EditItemViewModel = hiltViewModel()
     val navController = LocalNavController.current
     val screenState by viewModel.stateFlow.collectAsState()
 
-    LaunchedEffect(Unit) {
-        returnTitle.invoke(R.string.edit_menu)
-        returnNavigateUpAction.invoke(
-            NavigateUpAction.VisibleNavigate(
-                onNavigateButtonPressed = { navController.popBackStack()}
-            ))
+//    LaunchedEffect(Unit) {
+//        returnTitle.invoke(R.string.edit_menu)
+//        returnNavigateUpAction.invoke(
+//            NavigateUpAction.VisibleNavigate(
+//                onNavigateButtonPressed = { navController.popBackStack()}
+//            ))
+//    }
+    val lifecycleOwner = LocalLifecycleOwner.current
+
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            when (event) {
+                Lifecycle.Event.ON_CREATE -> {
+                    //LaunchedEffect(Unit) {
+                    currentReturnTitle.value.invoke(R.string.edit_menu)
+                    currentReturnNavigateUpAction.value.invoke(
+                        NavigateUpAction.VisibleNavigate(
+                            onNavigateButtonPressed = { navController.popBackStack()}
+                        ))
+                }
+                //}
+                else -> {}
+            }
+        }
+
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
     }
 
 
@@ -139,6 +170,7 @@ fun EditItemContent(
                             containerColor = Color(0xFFF4F4F4),
                             contentColor = Color.Black
                         ),
+                        elevation = ButtonDefaults.elevatedButtonElevation(6.dp),
                         enabled = screenState.isButtonEnabled(textValueForAdding),
                     ) {
                         Text(
@@ -173,6 +205,7 @@ fun EditItemContent(
                             containerColor = Color(0xFFF4F4F4),
                             contentColor = Color.Black
                         ),
+                        elevation = ButtonDefaults.elevatedButtonElevation(6.dp),
                         enabled = screenState.isButtonEnabled(textValueForDeleting),
                     ) {
                         Text(

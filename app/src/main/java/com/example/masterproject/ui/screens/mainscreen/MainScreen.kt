@@ -17,18 +17,24 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.example.masterproject.R
 import com.example.masterproject.ui.screens.AppSettingGraphs.AppSettingRoute
 import com.example.masterproject.ui.screens.LocalNavController
 import com.example.masterproject.ui.screens.ExchangeRateGraphs.ExchangeRateRoute
+import com.example.masterproject.ui.screens.MainGraph
 import com.example.masterproject.ui.screens.NavigateUpAction
 import com.example.masterproject.ui.screens.StrorageGraphs.StorageRoute
 
@@ -47,11 +53,33 @@ fun MainScreen(
     returnTitle: (Int) -> Unit,
     returnNavigateUpAction: (NavigateUpAction) -> Unit
 ){
+    val currentReturnTitle = rememberUpdatedState(returnTitle)
+    val currentReturnNavigateUpAction = rememberUpdatedState(returnNavigateUpAction)
     val navController = LocalNavController.current
 
-    LaunchedEffect(Unit) {
-        returnTitle.invoke(R.string.main_screen)
-        returnNavigateUpAction.invoke(NavigateUpAction.Hidden)
+//    LaunchedEffect(Unit) {
+//        returnTitle.invoke(R.string.main_screen)
+//        returnNavigateUpAction.invoke(NavigateUpAction.Hidden)
+//    }
+
+    val lifecycleOwner = LocalLifecycleOwner.current
+
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            when (event) {
+                Lifecycle.Event.ON_CREATE -> {
+                    currentReturnTitle.value.invoke(R.string.main_screen)
+                    currentReturnNavigateUpAction.value.invoke(NavigateUpAction.Hidden)
+                }
+
+                else -> {}
+            }
+        }
+
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
     }
 
     MainContent(

@@ -3,7 +3,6 @@ package com.example.masterproject.model
 import com.example.masterproject.model.database.DBRepositories
 import com.example.masterproject.model.marketpair.entities.MarketPair
 import com.example.masterproject.model.marketpair.entities.MarketPairWithDetails
-import com.example.masterproject.model.marketsnapshot.entities.MarketSnapshot
 import com.example.masterproject.ui.tools.sourceNames
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -36,10 +35,10 @@ class MarketPairRepository @Inject constructor(
 
 
     init {
-        val listFromBinance = dbRepositories.roomMarketPairRepository.getAllMarketPairs("Binance")
+        val listFromDb = dbRepositories.roomMarketPairRepository.getAllMarketPairs()
 
         customScope.launch{
-            listFromBinance.collect{
+            listFromDb.collect{
                     list ->
                 _listMarketPairDetails.value = list.map {
                     val marketPair = it?.toMarketPair() ?:
@@ -57,25 +56,17 @@ class MarketPairRepository @Inject constructor(
     }
 
     suspend fun saveMarketSnapshot(){
-        val id = dbRepositories.roomMarketSnapshotRepository.createSnapshot()
-            //val marketSnap = dbRepositories.roomMarketSnapshotRepository.createSnapshot()
-            val list = _listMarketPairDetails.first()
-            //println("Size on marketPairWithDetails: ${marketSnap.toMarketSnapshot().id}")
-            for (marketPairWithDetails in list){
-              dbRepositories.roomMarketSnapshotRepository.createMarketSnapshotAndDetails(
-                  id,
-                  marketPairWithDetails = marketPairWithDetails
-               )
-//                println("Size on marketPairWithDetails: ///////////////////////////////////")
-//                println("Size on marketPairWithDetails: id ${marketPairWithDetails.id}")
-//                println("Size on marketPairWithDetails: price ${marketPairWithDetails.price}")
-//                println("Size on marketPairWithDetails: pair ${marketPairWithDetails.tradePair}")
-//                println("Size on marketPairWithDetails: source ${marketPairWithDetails.sourceName}")
-//                println("Size on marketPairWithDetails: ///////////////////////////////////")
-//            }
+        val list = _listMarketPairDetails.first()
+        dbRepositories.roomMarketSnapshotRepository.createSnapshotWithDetails(list = list)
 
-
-    }}
+//        val id = dbRepositories.roomMarketSnapshotRepository.createSnapshot()
+//        for (marketPairWithDetails in list){
+//            dbRepositories.roomMarketSnapshotRepository.createMarketSnapshotAndDetails(
+//                id,
+//                marketPairWithDetails = marketPairWithDetails
+//            )
+//        }
+    }
 
     suspend fun deletePairFromList(id: Long){
         //Delete pair from DB
