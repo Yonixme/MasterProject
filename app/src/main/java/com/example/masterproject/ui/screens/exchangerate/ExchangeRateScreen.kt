@@ -1,15 +1,13 @@
 package com.example.masterproject.ui.screens.exchangerate
 
 import android.widget.Toast
-import androidx.compose.foundation.gestures.scrollable
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -19,11 +17,9 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
@@ -39,12 +35,13 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.example.masterproject.R
-import com.example.masterproject.ui.screens.LocalNavController
+import com.example.masterproject.ui.components.LocalAppTheme
+import com.example.masterproject.ui.tools.LocalNavController
 import com.example.masterproject.ui.screens.exchangerate.ExchangeRateViewModel.*
-import com.example.masterproject.ui.components.CustomButton
+import com.example.masterproject.ui.components.custom.CustomButton
 import com.example.masterproject.ui.screens.ExchangeRateGraphs.EditRoute
 import com.example.masterproject.ui.screens.MainGraph
-import com.example.masterproject.ui.screens.NavigateUpAction
+import com.example.masterproject.ui.components.NavigateUpAction
 
 @Preview(showSystemUi = true)
 @Composable
@@ -115,66 +112,66 @@ fun ExchangeRateScreen(
 fun ExchangeRateContent(getScreenState: () -> ScreenState,
                         onEditItemListScreen: () -> Unit,
                         onSaveClicked: () -> Unit) {
-    Box(
+    val theme = LocalAppTheme.current
+    Column (
         modifier = Modifier
             .fillMaxSize()
-    ) {
-        Column (
+            .verticalScroll(rememberScrollState())
+            .background(theme.bgColor),
+        verticalArrangement = Arrangement.SpaceEvenly,
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ){
+        Card(
             modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.SpaceEvenly,
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ){
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .heightIn(max = 550.dp, min = 250.dp)
-                    .padding(16.dp),
-                colors = CardDefaults.cardColors(containerColor = Color(0xFFF4F4F4)),
-                elevation = CardDefaults.elevatedCardElevation(6.dp)
-            ) {
-                when(val screenState = getScreenState()){
-                    ScreenState.Loading -> {
-                        CircularProgressIndicator(modifier = Modifier.align(alignment = Alignment.CenterHorizontally))
-                    }
-                    is ScreenState.Success -> {
-                        LazyColumn(modifier = Modifier.fillMaxSize()){
-                            items(screenState.pairCoins){
-                                Row (
+                .fillMaxWidth()
+                .heightIn(max = 550.dp, min = 250.dp)
+                .padding(16.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = theme.primaryColor,
+                contentColor = theme.textColor),
+            elevation = CardDefaults.elevatedCardElevation(6.dp)
+        ) {
+            when(val screenState = getScreenState()){
+                ScreenState.Loading -> {
+                    CircularProgressIndicator(modifier = Modifier.align(alignment = Alignment.CenterHorizontally))
+                }
+                is ScreenState.Success -> {
+                    LazyColumn(modifier = Modifier.fillMaxSize()){
+                        items(screenState.pairCoins){
+                            Row (
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ){
+                                Text(
+                                    text = it.tradePair,
+                                    modifier = Modifier,
+                                    fontSize = 25.sp
+                                )
+                                Text(
+                                    text = if(it.price >= 0 )it.price.toString() else "",
                                     modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(16.dp),
-                                    horizontalArrangement = Arrangement.SpaceBetween,
-                                    verticalAlignment = Alignment.CenterVertically
-                                ){
-                                    Text(
-                                        text = it.tradePair,
-                                        modifier = Modifier,
-                                        fontSize = 25.sp
-                                    )
-                                    Text(
-                                        text = if(it.price >= 0 )it.price.toString() else "",
-                                        modifier = Modifier
-                                            .padding(horizontal = 16.dp),
-                                        fontSize = 25.sp
-                                    )
-                                }
+                                        .padding(horizontal = 16.dp),
+                                    fontSize = 25.sp
+                                )
                             }
                         }
                     }
                 }
             }
-            Row (
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly
-            ){
-                CustomButton(stringResource(R.string.save)) { onSaveClicked.invoke()}
-                CustomButton(stringResource(R.string.edit)) { onEditItemListScreen.invoke() }
-            }
+        }
+        Row (
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ){
+            CustomButton(stringResource(R.string.save)) { onSaveClicked.invoke()}
+            CustomButton(stringResource(R.string.edit)) { onEditItemListScreen.invoke() }
         }
     }
 }
+
 
 
 /*@Composable

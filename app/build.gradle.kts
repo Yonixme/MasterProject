@@ -57,12 +57,13 @@ dependencies {
     ksp(libs.hilt.compiler)
     ksp(libs.room.compiler)
     implementation(libs.hilt.compose)
-    implementation(libs.retrofit2)
-    implementation(libs.converter.gcon)
     implementation(libs.kotlinx.serializaion.core)
     implementation(libs.kotlinx.collections.immutable)
     implementation(libs.room.runtime)
     implementation(libs.room.ktx)
+    implementation(libs.retrofit2)
+
+    implementation(libs.converter.moshi)
 
     implementation(libs.material3)
     implementation(libs.nav.compose)

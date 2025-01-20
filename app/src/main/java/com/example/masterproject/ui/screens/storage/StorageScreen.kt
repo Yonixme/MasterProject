@@ -1,6 +1,7 @@
 package com.example.masterproject.ui.screens.storage
 
 import android.widget.Toast
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,7 +16,6 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
@@ -30,15 +30,12 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.example.masterproject.R
-import com.example.masterproject.model.marketsnapshot.entities.MarketPairsWithDetailsSnapshot
-import com.example.masterproject.ui.screens.LocalNavController
+import com.example.masterproject.ui.components.LocalAppTheme
+import com.example.masterproject.ui.tools.LocalNavController
 import com.example.masterproject.ui.screens.MainGraph
-import com.example.masterproject.ui.screens.NavigateUpAction
-import com.example.masterproject.ui.screens.exchangerate.ExchangeRateViewModel
+import com.example.masterproject.ui.components.NavigateUpAction
 import com.example.masterproject.ui.screens.storage.StorageScreenViewModel.ScreenState
-import com.example.masterproject.ui.tools.cryptoCoins
 import com.example.masterproject.ui.tools.formatUnixTimeMillis
-import kotlin.random.Random
 
 @Composable
 @Preview(showSystemUi = true)
@@ -99,15 +96,17 @@ fun StorageScreen(
 fun StorageContent(
     getScreenState: () -> ScreenState
 ) {
+    val theme = LocalAppTheme.current
     Box(
         modifier = Modifier
             .fillMaxSize()
+            .background(theme.bgColor)
     ) {
         Card(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(horizontal = 16.dp, vertical = 26.dp),
-            colors = CardDefaults.cardColors(containerColor = Color(0xFFE5E4E4)),
+            colors = CardDefaults.cardColors(containerColor = theme.secondaryColor),
             elevation = CardDefaults.elevatedCardElevation(6.dp)
         ) {
             when(val screenState = getScreenState()){
@@ -124,7 +123,9 @@ fun StorageContent(
                                 modifier = Modifier
                                     .padding(horizontal = 8.dp, vertical = 16.dp)
                                     .fillMaxWidth(),
-                                colors = CardDefaults.cardColors(containerColor = Color(0xFFF4F4F4))
+                                colors = CardDefaults.cardColors(
+                                    containerColor = theme.primaryColor,
+                                    contentColor = theme.textColor)
                             ) {
                                 Column (
                                     modifier = Modifier
@@ -175,63 +176,3 @@ fun StorageContent(
         }
     }
 }
-//
-//
-//@Composable
-//fun ContainerForData(index: Int){
-//    Card(
-//        modifier = Modifier
-//            .padding(horizontal = 8.dp, vertical = 16.dp)
-//            .fillMaxWidth(),
-//        colors = CardDefaults.cardColors(containerColor = Color(0xFFF4F4F4))
-//    ) {
-//        Column (
-//            modifier = Modifier
-//                .heightIn(min = 100.dp, max = 900.dp)
-//                .fillMaxWidth(),
-//            horizontalAlignment = Alignment.CenterHorizontally,
-//            verticalArrangement = Arrangement.Center
-//        ){
-//            Text(
-//                text = "Data ${savedCoinPairs[index].id}",
-//                fontSize = 24.sp,
-//                modifier = Modifier
-//                    .wrapContentSize()
-//                    .padding(16.dp)
-//            )
-//            Text(
-//                text = "Time: ${savedCoinPairs[index].time}",
-//                fontSize = 20.sp,
-//                modifier = Modifier
-//                    .wrapContentSize()
-//                    .padding(16.dp)
-//            )
-//            LazyColumn(
-//                modifier = Modifier
-//                    .wrapContentSize()
-//                    .padding(8.dp),
-//                horizontalAlignment = Alignment.CenterHorizontally,
-//                verticalArrangement = Arrangement.SpaceEvenly
-//            ){
-//                items(savedCoinPairs[index].tradePairs.size){
-//                    Text(
-//                        text = "Coin ${savedCoinPairs[index].tradePairs[it]} ${savedCoinPairs[index].prices[it]}",
-//                        modifier = Modifier
-//                            .padding(6.dp)
-//                            .wrapContentSize()
-//                    )
-//                }
-//            }
-//        }
-//
-//    }
-//}
-//
-//private val savedCoinPairs = (0..10).map {
-//    MarketPairsWithDetailsSnapshot(
-//        time = it.toLong() * 1000,
-//        tradePairs = cryptoCoins.subList(0, 10),
-//        id = it.toLong(),
-//        prices = (0..10).map{(Random.nextInt(1000)).toDouble()},
-//        sourceName = List(10) { "Binance" })
-//}

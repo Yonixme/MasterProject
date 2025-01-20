@@ -1,4 +1,4 @@
-package com.example.masterproject.ui.screens
+package com.example.masterproject.ui.components
 
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
@@ -18,6 +18,8 @@ import androidx.navigation.NavController
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph
 import androidx.navigation.compose.currentBackStackEntryAsState
+import com.example.masterproject.ui.screens.AppTab
+import com.example.masterproject.ui.screens.routeClass
 import kotlinx.collections.immutable.ImmutableList
 
 @Composable
@@ -25,9 +27,10 @@ fun AppNavigationBar(
     navController: NavController,
     tabs: ImmutableList<AppTab>,
 ){
+    val theme = LocalAppTheme.current
     NavigationBar(
-        containerColor = Color(0xFFF4F4F4),
-        contentColor = Color.Black,
+        containerColor = theme.bgColor,
+        contentColor = theme.textColor,
         modifier = Modifier.height(100.dp)
     ) {
         val currentBackStackEntry by navController.currentBackStackEntryAsState()
@@ -57,10 +60,14 @@ fun AppNavigationBar(
                         )
                 },
                 label = {
-                    Text(text = stringResource( id = tab.labelRes ))
+                    Text(
+                        text = stringResource( id = tab.labelRes ),
+                        )
                 },
                 colors = NavigationBarItemDefaults.colors(
-                    indicatorColor = Color(0xFFD7D6D6),
+                    indicatorColor = theme.primaryColor,
+                    selectedTextColor = theme.textColor,
+                    unselectedTextColor = theme.textColor
                 ),
             )
         }

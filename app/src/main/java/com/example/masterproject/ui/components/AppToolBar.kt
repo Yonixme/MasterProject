@@ -1,4 +1,4 @@
-package com.example.masterproject.ui.screens
+package com.example.masterproject.ui.components
 
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -37,20 +37,21 @@ fun AppToolBar(
     @StringRes titleRes: Int,
     navigateUpAction: NavigateUpAction
 ){
+    val theme = LocalAppTheme.current
     CenterAlignedTopAppBar(
         colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = Color.White,
+            containerColor = theme.bgColor,
         ),
         modifier = Modifier.fillMaxWidth(),
         title = {
             Text(
                 text = stringResource(titleRes),
                 fontSize = 32.sp,
+                color = theme.textColor
             )
         },
         navigationIcon = {
             if(navigateUpAction is NavigateUpAction.VisibleNavigateAndAction || navigateUpAction is NavigateUpAction.VisibleNavigate){
-
                 IconButton(
                     onClick = {
                         if (navigateUpAction is NavigateUpAction.VisibleNavigate) navigateUpAction.onNavigateButtonPressed.invoke()
@@ -60,7 +61,7 @@ fun AppToolBar(
                     Icon(
                         modifier = Modifier.size(30.dp),
                         imageVector = Icons.Default.ArrowBack,
-                        contentDescription = null
+                        contentDescription = null,
                     )
                 }
             }

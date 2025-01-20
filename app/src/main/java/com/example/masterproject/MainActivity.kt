@@ -22,10 +22,11 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
-import com.example.masterproject.ui.screens.AppNavigationBar
+import com.example.masterproject.ui.components.AppNavigationBar
+import com.example.masterproject.ui.components.AppThemeContainer
 import com.example.masterproject.ui.screens.AppSettingGraphs
 import com.example.masterproject.ui.screens.AppSettingGraphs.AppSettingRoute
-import com.example.masterproject.ui.screens.LocalNavController
+import com.example.masterproject.ui.tools.LocalNavController
 import com.example.masterproject.ui.screens.SettingRoute
 import com.example.masterproject.ui.screens.storage.StorageScreen
 import com.example.masterproject.ui.screens.exchangerate.editmenu.EditItemScreen
@@ -33,14 +34,15 @@ import com.example.masterproject.ui.screens.exchangerate.ExchangeRateScreen
 import com.example.masterproject.ui.screens.mainscreen.MainScreen
 import com.example.masterproject.ui.screens.setting.innersetting.InnerSettingScreen
 import com.example.masterproject.ui.screens.setting.SettingScreen
-import com.example.masterproject.ui.screens.AppToolBar
+import com.example.masterproject.ui.components.AppToolBar
+import com.example.masterproject.ui.components.LocalAppTheme
 import com.example.masterproject.ui.screens.ExchangeRateGraphs
 import com.example.masterproject.ui.screens.ExchangeRateGraphs.EditRoute
 import com.example.masterproject.ui.screens.ExchangeRateGraphs.ExchangeRateRoute
 import com.example.masterproject.ui.screens.MainTabs
 import com.example.masterproject.ui.screens.MainGraph
 import com.example.masterproject.ui.screens.MainGraph.MainRoute
-import com.example.masterproject.ui.screens.NavigateUpAction
+import com.example.masterproject.ui.components.NavigateUpAction
 import com.example.masterproject.ui.screens.StrorageGraphs
 import com.example.masterproject.ui.screens.StrorageGraphs.StorageRoute
 import dagger.hilt.android.AndroidEntryPoint
@@ -52,7 +54,9 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            ExcApp()
+            AppThemeContainer {
+                ExcApp()
+            }
         }
     }
 }
@@ -62,11 +66,12 @@ fun ExcApp(){
     val navController = rememberNavController()
     var titleRes by rememberSaveable { mutableIntStateOf(R.string.init_name_value_screen) }
     var navigateUpAction: NavigateUpAction by remember { mutableStateOf(NavigateUpAction.Hidden) }
+    val theme = LocalAppTheme.current
 
     Scaffold (
         topBar = { AppToolBar(titleRes = titleRes, navigateUpAction = navigateUpAction) },
         bottomBar = { AppNavigationBar(navController = navController, tabs = MainTabs) },
-        containerColor = Color.White
+        containerColor = theme.bgColor
     ){ paddingValues ->
         CompositionLocalProvider(
             LocalNavController provides navController

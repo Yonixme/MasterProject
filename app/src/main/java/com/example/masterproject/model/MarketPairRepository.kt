@@ -3,7 +3,6 @@ package com.example.masterproject.model
 import com.example.masterproject.model.database.DBRepositories
 import com.example.masterproject.model.marketpair.entities.MarketPair
 import com.example.masterproject.model.marketpair.entities.MarketPairWithDetails
-import com.example.masterproject.ui.tools.sourceNames
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -22,7 +21,6 @@ import java.io.IOException
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.coroutines.suspendCoroutine
-import kotlin.random.Random
 
 @Singleton
 class MarketPairRepository @Inject constructor(
@@ -53,19 +51,12 @@ class MarketPairRepository @Inject constructor(
                 }
             }
         }
+        //updateMarketPairDetails()
     }
 
     suspend fun saveMarketSnapshot(){
         val list = _listMarketPairDetails.first()
         dbRepositories.roomMarketSnapshotRepository.createSnapshotWithDetails(list = list)
-
-//        val id = dbRepositories.roomMarketSnapshotRepository.createSnapshot()
-//        for (marketPairWithDetails in list){
-//            dbRepositories.roomMarketSnapshotRepository.createMarketSnapshotAndDetails(
-//                id,
-//                marketPairWithDetails = marketPairWithDetails
-//            )
-//        }
     }
 
     suspend fun deletePairFromList(id: Long){
@@ -95,12 +86,6 @@ class MarketPairRepository @Inject constructor(
         //TODO Get info for pair from API dependency timeline
 
 
-    }
-
-    private fun getRandomSourceName(): String{
-        val list = sourceNames
-
-        return list[Random.nextInt(list.size)]
     }
 
     fun resetToDefaultPrice(){
@@ -161,11 +146,11 @@ class MarketPairRepository @Inject constructor(
         customScope.launch {
             try {
                 println("On updating")
-                val updatedPrices = getPriceForPairs()
+                val initPrices = getPriceForPairs()
 
                 _listMarketPairDetails.update { currentList ->
                     currentList.map { pairCoin ->
-                        val updatedPrice = updatedPrices[pairCoin.tradePair] ?: pairCoin.price
+                        val updatedPrice = initPrices[pairCoin.tradePair] ?: pairCoin.price
 
                         pairCoin.copy(price = updatedPrice)
                     }
@@ -175,5 +160,36 @@ class MarketPairRepository @Inject constructor(
             }
         }
     }
+
+//    private suspend fun getPriceOnStartDay(): Map<String, Double?> = coroutineScope {
+//        val listMarketPairs = _listMarketPairDetails.single()
+//
+//        val listPairs = listMarketPairs.map { it.tradePair }
+//
+//        val baseUrl = "https://api.binance.com/api/v3/klines"
+//        val dateFormatter = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+//        val startOfDay = dateFormatter.parse(dateFormatter.format(Date()))?.time
+//
+//        listPairs.map { pair ->
+//            async {
+//                try {
+//                    val url = URL("$baseUrl?symbol=$pair&interval=1d&startTime=$startOfDay&limit=1")
+//                    with(url.openConnection() as HttpURLConnection) {
+//                        requestMethod = "GET"
+//                        inputStream.bufferedReader().use { reader ->
+//                            val response = JsonParser.parseString(reader.readText()).asJsonArray
+//                            val klineData = response.firstOrNull()?.asJsonArray
+//                            val openingPrice = klineData?.get(1)?.asString?.toDouble()
+//                            pair to openingPrice
+//                        }
+//                    }
+//                } catch (e: Exception) {
+//                    println("Error fetching opening price for $pair: ${e.message}")
+//                    pair to 0.0 // У випадку помилки повертаємо 0.0
+//                }
+//            }
+//        }.awaitAll().toMap()
+//    }
+
 }
 

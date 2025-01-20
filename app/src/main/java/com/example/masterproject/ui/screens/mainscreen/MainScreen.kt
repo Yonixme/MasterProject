@@ -18,7 +18,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
@@ -31,11 +30,11 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.example.masterproject.R
+import com.example.masterproject.ui.components.LocalAppTheme
 import com.example.masterproject.ui.screens.AppSettingGraphs.AppSettingRoute
-import com.example.masterproject.ui.screens.LocalNavController
+import com.example.masterproject.ui.tools.LocalNavController
 import com.example.masterproject.ui.screens.ExchangeRateGraphs.ExchangeRateRoute
-import com.example.masterproject.ui.screens.MainGraph
-import com.example.masterproject.ui.screens.NavigateUpAction
+import com.example.masterproject.ui.components.NavigateUpAction
 import com.example.masterproject.ui.screens.StrorageGraphs.StorageRoute
 
 @Composable
@@ -56,6 +55,7 @@ fun MainScreen(
     val currentReturnTitle = rememberUpdatedState(returnTitle)
     val currentReturnNavigateUpAction = rememberUpdatedState(returnNavigateUpAction)
     val navController = LocalNavController.current
+
 
 //    LaunchedEffect(Unit) {
 //        returnTitle.invoke(R.string.main_screen)
@@ -94,36 +94,34 @@ fun MainScreen(
 fun MainContent(onExchangeRateScreen: () -> Unit,
                 onSettingScreen: () -> Unit,
                 onStorageScreen: () -> Unit) {
-    Box(
+    val theme = LocalAppTheme.current
+    Column(
         modifier = Modifier
             .fillMaxSize()
+            .background(theme.bgColor)
+            .padding(horizontal = 16.dp),
+        verticalArrangement = Arrangement.SpaceEvenly,
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color.White)
-                .padding(horizontal = 16.dp),
-            verticalArrangement = Arrangement.SpaceEvenly,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            ContainerForText(stringResource(R.string.exchange_rate)){ onExchangeRateScreen.invoke()}
-            ContainerForText("Storage Information"){ onStorageScreen.invoke()}
-            ContainerForText("Setting"){ onSettingScreen.invoke()}
-        }
+        ContainerForText(stringResource(R.string.exchange_rate)){ onExchangeRateScreen.invoke()}
+        ContainerForText("Storage Information"){ onStorageScreen.invoke()}
+        ContainerForText("Setting"){ onSettingScreen.invoke()}
     }
 }
+
 
 
 @Composable
 fun ContainerForText(text: String,
                      onExchangeRateScreen: () -> Unit, ) {
+    val theme = LocalAppTheme.current
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .height(50.dp),
         colors = CardDefaults.cardColors(
-            containerColor = Color(0xFFF4F4F4),
-            contentColor = Color.Black,
+            containerColor = theme.primaryColor,
+            contentColor = theme.textColor,
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
     ) {

@@ -1,4 +1,4 @@
-package com.example.masterproject.ui.components
+package com.example.masterproject.ui.components.custom
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -20,18 +20,20 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.masterproject.ui.components.LocalAppTheme
 
 @Composable
 fun CustomButton(text: String,
                      onClick: () -> Unit) {
+    val theme = LocalAppTheme.current
     Card(
         modifier = Modifier
             .height(82.dp)
             .width(164.dp)
             .padding(16.dp),
         colors = CardDefaults.cardColors(
-            containerColor = Color(0xFFF4F4F4),
-            contentColor = Color.Black,
+            containerColor = theme.primaryColor,
+            contentColor = theme.textColor,
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
     ) {

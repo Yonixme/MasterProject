@@ -13,11 +13,10 @@ navVersion = "2.8.5"
 ksp = "2.0.0-1.0.21"
 hilt = "2.51.1"
 hiltNavCompose = "1.2.0"
-retrofit2 = "2.9.0"
 ktxSerialization = "1.6.3"
 ktxImmutableCollections = "0.3.7"
 room = "2.6.1"
-
+retrofit2 = "2.9.0"
 
 [libraries]
 kotlinx-collections-immutable = {module = "org.jetbrains.kotlinx:kotlinx-collections-immutable", version.ref = "ktxImmutableCollections"}
@@ -25,11 +24,11 @@ kotlinx-serializaion-core = {module = "org.jetbrains.kotlinx:kotlinx-serializati
 hilt = {module = "com.google.dagger:hilt-android", version.ref = "hilt"}
 hilt-compiler = {module = "com.google.dagger:hilt-android-compiler", version.ref = "hilt"}
 hilt-compose = {module = "androidx.hilt:hilt-navigation-compose", version.ref = "hiltNavCompose"}
-retrofit2 = {module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit2"}
-converter-gcon = {module = "com.squareup.retrofit2:converter-gson", version.ref = "retrofit2"}
 room-runtime ={module = "androidx.room:room-runtime", version.ref = "room"}
 room-ktx = {module = "androidx.room:room-ktx", version = "room"}
 room-compiler = {module = "androidx.room:room-compiler", version.ref = "room"}
+retrofit2 = {module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit2"}
+converter-moshi ={module = "com.squareup.retrofit2:converter-moshi", version.ref = "retrofit2"}
 
 material3 = { module = "androidx.compose.material3:material3", version.ref = "material3" }
 nav-compose = {module = "androidx.navigation:navigation-compose", version.ref="navVersion"}
