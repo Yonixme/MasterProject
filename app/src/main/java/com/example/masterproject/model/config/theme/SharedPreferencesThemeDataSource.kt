@@ -3,6 +3,14 @@ package com.example.masterproject.model.config.theme
 import android.content.Context
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import com.example.masterproject.ui.theme.bgColorDark
+import com.example.masterproject.ui.theme.bgColorLight
+import com.example.masterproject.ui.theme.primaryColorDark
+import com.example.masterproject.ui.theme.primaryColorLight
+import com.example.masterproject.ui.theme.secondaryColorDark
+import com.example.masterproject.ui.theme.secondaryColorLight
+import com.example.masterproject.ui.theme.textColorDark
+import com.example.masterproject.ui.theme.textColorLight
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import javax.inject.Inject
@@ -29,6 +37,25 @@ class SharedPreferencesThemeDataSource(
 
     private fun readTheme(): AppTheme{
         if (!hasSavedTheme()) return AppTheme.Light
+        val theme = getThemeFromPreferences()
+        return if(checkThemeOnValidation(theme)) theme else AppTheme.Light
+    }
+
+    private fun hasSavedTheme(): Boolean = preferences.contains(KEY_THEME_PRIMARY_COLOR)
+
+    private fun checkThemeOnValidation(theme: AppTheme) : Boolean{
+        if (!hasSavedTheme()) return true
+        return  (theme.bgColor == bgColorLight &&
+                theme.textColor == textColorLight &&
+                theme.primaryColor == primaryColorLight &&
+                theme.secondaryColor == secondaryColorLight) ||
+                (theme.textColor == textColorDark &&
+                theme.primaryColor == primaryColorDark &&
+                theme.bgColor == bgColorDark &&
+                theme.secondaryColor == secondaryColorDark)
+    }
+
+    private fun getThemeFromPreferences(): AppTheme{
         return AppTheme(
             primaryColor = Color(preferences.getInt(KEY_THEME_PRIMARY_COLOR, 0)),
             secondaryColor = Color(preferences.getInt(KEY_THEME_SECONDARY_COLOR, 0)),
@@ -36,8 +63,6 @@ class SharedPreferencesThemeDataSource(
             textColor = Color(preferences.getInt(KEY_THEME_TEXT_COLOR, 0)),
         )
     }
-
-    private fun hasSavedTheme(): Boolean = preferences.contains(KEY_THEME_PRIMARY_COLOR)
 
     private companion object{
         const val THEME_NAME = "Theme name"

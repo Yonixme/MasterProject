@@ -1,4 +1,4 @@
-package com.example.masterproject.model
+package com.example.masterproject.model.marketsnapshot
 
 import com.example.masterproject.model.database.DBRepositories
 import com.example.masterproject.model.marketsnapshot.entities.MarketSnapshotAndDetails

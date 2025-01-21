@@ -2,7 +2,7 @@ package com.example.masterproject.ui.screens.exchangerate.editmenu
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.masterproject.model.MarketPairRepository
+import com.example.masterproject.model.marketpair.MarketPairRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ReceiveChannel
@@ -26,7 +26,7 @@ class EditItemViewModel @Inject constructor(
     fun addPair(pair: String){
         viewModelScope.launch {
             _stateFlow.update { it.copy(isEditInProgress = true) }
-            pairsCoinsRepository.addPairInList(pair)
+            pairsCoinsRepository.addPairInList(pair, sourceName = "Binance")
             _exitChannel.send(Unit)
         }
     }

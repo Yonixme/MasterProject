@@ -1,4 +1,4 @@
-package com.example.masterproject.model
+package com.example.masterproject.model.marketpair
 
 import com.example.masterproject.model.database.DBRepositories
 import com.example.masterproject.model.marketpair.entities.MarketPair
@@ -8,40 +8,33 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import okhttp3.Call
-import okhttp3.Callback
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import okhttp3.Response
-import org.json.JSONArray
-import java.io.IOException
 import javax.inject.Inject
 import javax.inject.Singleton
-import kotlin.coroutines.suspendCoroutine
 
 @Singleton
 class MarketPairRepository @Inject constructor(
-    private val dbRepositories: DBRepositories
+    private val dbRepositories: DBRepositories,
+    private val symbolPriceSource: SymbolPriceSource
 ){
-    private var _listMarketPairDetails: MutableStateFlow<List<MarketPairWithDetails>> = MutableStateFlow(
+    private val _listMarketPairDetails: MutableStateFlow<List<MarketPairWithDetails>> = MutableStateFlow(
         emptyList()
     )
-    private val customScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+    private var _listMarketPriceOnStartDay: MutableStateFlow<List<MarketPairWithDetails>> = MutableStateFlow(
+        emptyList()
+    )
 
+    private val customScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
     init {
         val listFromDb = dbRepositories.roomMarketPairRepository.getAllMarketPairs()
-
         customScope.launch{
             listFromDb.collect{
                     list ->
-                _listMarketPairDetails.value = list.map {
-                    val marketPair = it?.toMarketPair() ?:
+                val mappedList = list.map {
+                    val marketPair = it ?:
                     MarketPair(id = 0, tradePair = "Not Found", sourceName = "Not Found")
-
                     MarketPairWithDetails(
                         id = marketPair.id,
                         tradePair = marketPair.tradePair,
@@ -49,30 +42,32 @@ class MarketPairRepository @Inject constructor(
                         price = -1.0 // Default price
                     )
                 }
+                _listMarketPairDetails.value = mappedList
+                _listMarketPriceOnStartDay.value = mappedList
+                val d = symbolPriceSource.getPriceAtTheStartDay("BTCUSDT")
             }
         }
-        //updateMarketPairDetails()
     }
 
     suspend fun saveMarketSnapshot(){
-        val list = _listMarketPairDetails.first()
+        val list = _listMarketPairDetails.value
+        if(list.isEmpty()) return
         dbRepositories.roomMarketSnapshotRepository.createSnapshotWithDetails(list = list)
     }
 
+    //Delete pair from DB
     suspend fun deletePairFromList(id: Long){
-        //Delete pair from DB
         dbRepositories.roomMarketPairRepository.deleteMarketPair(id)
     }
 
-    suspend fun addPairInList(pair: String){
-        //Add pair in DB
-        val sourceName = "Binance"
-        dbRepositories.roomMarketPairRepository.AddMarketPair(MarketPair(0, tradePair = pair, sourceName))
+    //Add pair in DB
+    suspend fun addPairInList(pair: String, sourceName: String){
+        dbRepositories.roomMarketPairRepository.AddMarketPair(MarketPair(0,
+            tradePair = pair,
+            sourceName = sourceName))
     }
 
     fun getMarketPairWithDetailsList(): Flow<List<MarketPairWithDetails>> = _listMarketPairDetails
-
-    //fun getMarketPairList(): Flow<List<MarketPairWithDetails>> = dbRepositories.roomMarketPairRepository.getAllMarketPairs()
 
     fun getIdForPair(pair: String): Long{
         val listMarketPairDetailsCoin = _listMarketPairDetails.value.filter { it.tradePair == pair }
@@ -80,78 +75,34 @@ class MarketPairRepository @Inject constructor(
         return if (listMarketPairDetailsCoin.isNotEmpty()) listMarketPairDetailsCoin[0].id else -1
     }
 
-
-
+    //TODO Get info for pair from API dependency timeline
     suspend fun getInfoForPair(id: Long, time: String){
-        //TODO Get info for pair from API dependency timeline
-
 
     }
 
+    //Reset price value to -1
     fun resetToDefaultPrice(){
-        //Reset price value to -1
-
         _listMarketPairDetails.update { currentList ->
             currentList.map { pairCoin ->
-                val updatedPrice: Double = -1.0
-
-                pairCoin.copy(price = updatedPrice)
+                pairCoin.copy(price = -1.0)
             }
         }
     }
 
-    private suspend fun getPriceForPairs(): Map<String, Double>{
-        return suspendCoroutine {continuation ->
-            val pairs = _listMarketPairDetails.value.map { it.tradePair }
+    private suspend fun getMarketPrice(): Map<String, Double>{
+        val pairs = _listMarketPairDetails.value.map { it.tradePair }
 
-            val client = OkHttpClient()
-            val request = Request.Builder()
-                .url("https://api.binance.com/api/v3/ticker/price")
-                .build()
-
-            client.newCall(request).enqueue(object : Callback{
-                override fun onFailure(call: Call, e: IOException) {
-                    println("Error 123: ${e.message}")
-                }
-
-                override fun onResponse(call: Call, response: Response) {
-                    try {
-                        response.use {
-                            if (!response.isSuccessful){
-                                return
-                            }
-                            val responseBody = response.body()?.string()
-                            val jsonArray = JSONArray(responseBody)
-                            val pricesMap = mutableMapOf<String, Double>()
-
-                            for(i in 0 until jsonArray.length()){
-                                val obj = jsonArray.getJSONObject(i)
-                                val symbol = obj.getString("symbol")
-                                val price = obj.getString("price").toDouble()
-                                pricesMap[symbol] = price
-                            }
-                            val filteredPrices = pricesMap.filterKeys { it in pairs }
-                            continuation.resumeWith(Result.success(filteredPrices))
-                        }
-                    }catch (e: Exception){
-                        println("Error parsing response: ${e.message}")
-                    }
-                }
-            })
-        }
+        return symbolPriceSource.getSymbolPrice(pairs)
     }
 
+    // Fetch all prices concurrently and update the state
     fun updateMarketPairDetails(){
-        // Fetch all prices concurrently and update the state
         customScope.launch {
             try {
-                println("On updating")
-                val initPrices = getPriceForPairs()
-
+                val prices = getMarketPrice()
                 _listMarketPairDetails.update { currentList ->
                     currentList.map { pairCoin ->
-                        val updatedPrice = initPrices[pairCoin.tradePair] ?: pairCoin.price
-
+                        val updatedPrice = prices[pairCoin.tradePair] ?: pairCoin.price
                         pairCoin.copy(price = updatedPrice)
                     }
                 }
@@ -160,6 +111,7 @@ class MarketPairRepository @Inject constructor(
             }
         }
     }
+
 
 //    private suspend fun getPriceOnStartDay(): Map<String, Double?> = coroutineScope {
 //        val listMarketPairs = _listMarketPairDetails.single()

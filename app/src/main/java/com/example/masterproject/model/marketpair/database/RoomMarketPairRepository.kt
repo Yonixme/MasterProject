@@ -1,10 +1,11 @@
 package com.example.masterproject.model.marketpair.database
 
-import com.example.masterproject.model.modules.IoDispatcher
+import com.example.masterproject.di.IoDispatcher
 import com.example.masterproject.model.marketpair.database.entities.MarketPairDbEntity
 import com.example.masterproject.model.marketpair.entities.MarketPair
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -14,7 +15,14 @@ class RoomMarketPairRepository @Inject constructor(
     @IoDispatcher private val ioDispatcher: CoroutineDispatcher
 ) : DBMarketPairRepository
 {
-    override fun getAllMarketPairs(): Flow<List<MarketPairDbEntity?>> = marketPairDao.getAllMarketPairs()
+    override fun getAllMarketPairs(): Flow<List<MarketPair?>> {
+        return marketPairDao.getAllMarketPairs()
+            .map {list ->
+                list.map {
+                    it?.toMarketPair()
+                }
+            }
+    }
 
     override suspend fun deleteMarketPair(id: Long) {
         marketPairDao.deletePairById(id)

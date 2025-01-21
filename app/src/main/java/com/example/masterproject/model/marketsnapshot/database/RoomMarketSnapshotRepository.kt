@@ -3,8 +3,9 @@ package com.example.masterproject.model.marketsnapshot.database
 import com.example.masterproject.model.marketpair.entities.MarketPairWithDetails
 import com.example.masterproject.model.marketsnapshot.database.entities.MarketSnapshotDbEntity
 import com.example.masterproject.model.marketsnapshot.database.entities.MarketSnapshotDetailsDbEntity
+import com.example.masterproject.model.marketsnapshot.entities.MarketSnapshot
 import com.example.masterproject.model.marketsnapshot.entities.MarketSnapshotAndDetails
-import com.example.masterproject.model.modules.IoDispatcher
+import com.example.masterproject.di.IoDispatcher
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -17,8 +18,11 @@ class RoomMarketSnapshotRepository @Inject constructor(
     @IoDispatcher private val ioDispatcher: CoroutineDispatcher
 ): DBMarketSnapshotRepository{
 
-    override suspend fun getSnapshots(): List<MarketSnapshotDbEntity> {
+    override suspend fun getSnapshots(): List<MarketSnapshot> {
         return marketSnapshotDao.getSnapshots()
+            .map {
+                it.toMarketSnapshot()
+            }
     }
 
     override fun getMarketSnapshotAndDetails(): Flow<List<MarketSnapshotAndDetails>> {

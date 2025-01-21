@@ -1,4 +1,10 @@
 package com.example.masterproject.sources
 
-object SourceProviderHolder {
+import javax.inject.Inject
+import javax.inject.Singleton
+
+@Singleton
+class SourceProviderHolder @Inject constructor(
+
+) {
 }

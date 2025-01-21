@@ -1,4 +1,4 @@
-package com.example.masterproject.model.modules
+package com.example.masterproject.di
 
 import dagger.Module
 import dagger.Provides

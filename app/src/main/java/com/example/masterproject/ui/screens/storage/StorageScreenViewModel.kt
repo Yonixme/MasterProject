@@ -2,7 +2,7 @@ package com.example.masterproject.ui.screens.storage
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.masterproject.model.MarketSnapshotRepository
+import com.example.masterproject.model.marketsnapshot.MarketSnapshotRepository
 import com.example.masterproject.model.marketsnapshot.entities.MarketSnapshotAndDetails
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted

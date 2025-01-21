@@ -10,7 +10,7 @@ import retrofit2.HttpException
 import java.io.IOException
 import java.sql.Blob
 
-class BaseRetrofitSource(
+open class BaseRetrofitSource(
     retrofitConfig: RetrofitConfig
 ) {
     val retrofit = retrofitConfig.retrofit

@@ -2,7 +2,7 @@ package com.example.masterproject.ui.screens.exchangerate
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.masterproject.model.MarketPairRepository
+import com.example.masterproject.model.marketpair.MarketPairRepository
 import com.example.masterproject.model.marketpair.entities.MarketPairWithDetails
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
