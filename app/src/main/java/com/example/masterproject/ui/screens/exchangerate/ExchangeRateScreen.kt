@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -124,7 +125,7 @@ fun ExchangeRateContent(getScreenState: () -> ScreenState,
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .heightIn(max = 550.dp, min = 250.dp)
+                .height(550.dp)
                 .padding(16.dp),
             colors = CardDefaults.cardColors(
                 containerColor = theme.primaryColor,

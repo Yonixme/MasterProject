@@ -29,10 +29,10 @@ class RetrofitSymbolPriceSource @Inject constructor(
 
 
     override suspend fun getPriceAtTheStartDay(symbol: String): Map<String, Double> {
-        val listSymbolInformation =
+        val arraySymbolInformation =
             symbolPriceApi.getInfoForSymbolForDay(symbol)
 //        val price = listSymbolInformation[0].open.toDouble()
-        val price = listSymbolInformation[0][1].toString().toDouble()
+        val price = arraySymbolInformation[0][1].toString().toDouble()
 
         println("symbol123 = $symbol + price = $price")
         return mapOf(symbol to price)

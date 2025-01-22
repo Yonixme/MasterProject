@@ -21,7 +21,13 @@ class ExchangeRateViewModel @Inject constructor(
     private var isUpdatingData = false
 
     val stateFlow: StateFlow<ScreenState> = marketPairRepository.getMarketPairWithDetailsList()
-        .map (ScreenState::Success)
+        //.map (ScreenState::Success)
+        .map {
+            if (it != null)
+                ScreenState.Success(it)
+            else
+                ScreenState.Loading
+        }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.Lazily,

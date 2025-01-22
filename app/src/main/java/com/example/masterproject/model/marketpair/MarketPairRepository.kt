@@ -18,9 +18,15 @@ class MarketPairRepository @Inject constructor(
     private val dbRepositories: DBRepositories,
     private val symbolPriceSource: SymbolPriceSource
 ){
-    private val _listMarketPairDetails: MutableStateFlow<List<MarketPairWithDetails>> = MutableStateFlow(
+    private val _listMarketPairs: MutableStateFlow<List<MarketPair>> = MutableStateFlow(
         emptyList()
     )
+
+//    private val _listMarketPairDetails: MutableStateFlow<List<MarketPairWithDetails>>? = MutableStateFlow(
+//        emptyList()
+//    )
+    private val _listMarketPairDetails: MutableStateFlow<List<MarketPairWithDetails>?> = MutableStateFlow(null)
+
     private var _listMarketPriceOnStartDay: MutableStateFlow<List<MarketPairWithDetails>> = MutableStateFlow(
         emptyList()
     )
@@ -33,31 +39,46 @@ class MarketPairRepository @Inject constructor(
             listFromDb.collect{
                     list ->
                 val mappedList = list.map {
-                    val marketPair = it ?:
-                    MarketPair(id = 0, tradePair = "Not Found", sourceName = "Not Found")
+                    it ?: MarketPair(id = 0, tradePair = "Not Found", sourceName = "Not Found")
+                }
+                _listMarketPairs.value = mappedList
+
+                _listMarketPriceOnStartDay.value = mappedList.map {
+                        pairCoin ->
+                    val price = symbolPriceSource.getPriceAtTheStartDay(pairCoin.tradePair).get(pairCoin.tradePair) ?: -1.0
                     MarketPairWithDetails(
-                        id = marketPair.id,
-                        tradePair = marketPair.tradePair,
-                        sourceName = marketPair.sourceName,
-                        price = -1.0 // Default price
+                        id = pairCoin.id,
+                        tradePair = pairCoin.tradePair,
+                        sourceName = pairCoin.sourceName,
+                        price = price
                     )
                 }
-                _listMarketPairDetails.value = mappedList
-                _listMarketPriceOnStartDay.value = mappedList
-                val d = symbolPriceSource.getPriceAtTheStartDay("BTCUSDT")
+
+                val prices = getMarketPrice()
+                _listMarketPairDetails.value = mappedList.map{
+                        pairCoin ->
+                    val price = prices[pairCoin.tradePair] ?: -1.0
+                    MarketPairWithDetails(
+                        id = pairCoin.id,
+                        tradePair = pairCoin.tradePair,
+                        sourceName = pairCoin.sourceName,
+                        price = price
+                    )
+                }
             }
         }
     }
 
     suspend fun saveMarketSnapshot(){
         val list = _listMarketPairDetails.value
-        if(list.isEmpty()) return
+        if(list.isNullOrEmpty()) return
         dbRepositories.roomMarketSnapshotRepository.createSnapshotWithDetails(list = list)
     }
 
     //Delete pair from DB
     suspend fun deletePairFromList(id: Long){
         dbRepositories.roomMarketPairRepository.deleteMarketPair(id)
+        _listMarketPairDetails.value = null
     }
 
     //Add pair in DB
@@ -65,14 +86,33 @@ class MarketPairRepository @Inject constructor(
         dbRepositories.roomMarketPairRepository.AddMarketPair(MarketPair(0,
             tradePair = pair,
             sourceName = sourceName))
+        _listMarketPairDetails.value = null
+
     }
 
-    fun getMarketPairWithDetailsList(): Flow<List<MarketPairWithDetails>> = _listMarketPairDetails
+    fun getMarketPairWithDetailsList(): Flow<List<MarketPairWithDetails>?> {
+        return _listMarketPairDetails
+//        return _listMarketPairDetails.onStart {
+//                    _listMarketPairs.map{
+//                            list ->
+//                        _listMarketPriceOnStartDay.value = list.map{ pairCoin ->
+//                            val price = symbolPriceSource.getPriceAtTheStartDay(pairCoin.tradePair).get(pairCoin.tradePair) ?: -1.0
+//                            println("Debug123 = ${price}")
+//                            MarketPairWithDetails(
+//                                id = pairCoin.id,
+//                                tradePair = pairCoin.tradePair,
+//                                sourceName = pairCoin.sourceName,
+//                                price = price
+//                            )
+//                        }
+//                }
+//        }
+    }
 
     fun getIdForPair(pair: String): Long{
-        val listMarketPairDetailsCoin = _listMarketPairDetails.value.filter { it.tradePair == pair }
+        val listMarketPairDetailsCoin = _listMarketPairDetails.value?.filter { it.tradePair == pair }
 
-        return if (listMarketPairDetailsCoin.isNotEmpty()) listMarketPairDetailsCoin[0].id else -1
+        return if (!listMarketPairDetailsCoin.isNullOrEmpty()) listMarketPairDetailsCoin[0].id else -1
     }
 
     //TODO Get info for pair from API dependency timeline
@@ -83,14 +123,20 @@ class MarketPairRepository @Inject constructor(
     //Reset price value to -1
     fun resetToDefaultPrice(){
         _listMarketPairDetails.update { currentList ->
-            currentList.map { pairCoin ->
+            currentList?.map { pairCoin ->
                 pairCoin.copy(price = -1.0)
             }
         }
     }
 
+//    private suspend fun getMarketPrice(): Map<String, Double>{
+//        val pairs = _listMarketPairDetails.value.map { it.tradePair }
+//
+//        return symbolPriceSource.getSymbolPrice(pairs)
+//    }
+
     private suspend fun getMarketPrice(): Map<String, Double>{
-        val pairs = _listMarketPairDetails.value.map { it.tradePair }
+        val pairs = _listMarketPairs.value.map { it.tradePair }
 
         return symbolPriceSource.getSymbolPrice(pairs)
     }
@@ -101,7 +147,7 @@ class MarketPairRepository @Inject constructor(
             try {
                 val prices = getMarketPrice()
                 _listMarketPairDetails.update { currentList ->
-                    currentList.map { pairCoin ->
+                    currentList?.map { pairCoin ->
                         val updatedPrice = prices[pairCoin.tradePair] ?: pairCoin.price
                         pairCoin.copy(price = updatedPrice)
                     }
