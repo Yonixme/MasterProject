@@ -39,7 +39,12 @@ class MarketPairRepository @Inject constructor(
             listFromDb.collect{
                     list ->
                 val mappedList = list.map {
-                    it ?: MarketPair(id = 0, tradePair = "Not Found", sourceName = "Not Found")
+                    it ?: MarketPair(
+                        id = 0,
+                        tradePair = "Not Found",
+                        sourceName = "Not Found",
+                        ignoreWhenSaving = false
+                    )
                 }
                 _listMarketPairs.value = mappedList
 
@@ -83,9 +88,12 @@ class MarketPairRepository @Inject constructor(
 
     //Add pair in DB
     suspend fun addPairInList(pair: String, sourceName: String){
-        dbRepositories.roomMarketPairRepository.AddMarketPair(MarketPair(0,
+        dbRepositories.roomMarketPairRepository.AddMarketPair(MarketPair(
+            0,
             tradePair = pair,
-            sourceName = sourceName))
+            sourceName = sourceName,
+            ignoreWhenSaving = false
+        ))
         _listMarketPairDetails.value = null
 
     }

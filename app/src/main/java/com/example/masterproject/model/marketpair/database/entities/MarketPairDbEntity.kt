@@ -13,19 +13,22 @@ import com.example.masterproject.model.marketpair.entities.MarketPair
 data class MarketPairDbEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     @ColumnInfo(name = "trade_pair", collate = ColumnInfo.NOCASE) val tradePair: String,
-    @ColumnInfo(name = "source_name", collate = ColumnInfo.NOCASE) val sourceName: String
+    @ColumnInfo(name = "source_name", collate = ColumnInfo.NOCASE) val sourceName: String,
+    @ColumnInfo(name = "ignore_when_saving") val ignoreWhenSaving: Boolean?
 ){
     fun toMarketPair(): MarketPair = MarketPair(
         id = id,
         tradePair = tradePair,
-        sourceName = sourceName
+        sourceName = sourceName,
+        ignoreWhenSaving = ignoreWhenSaving ?: false
     )
 
     companion object{
         fun fromMarketPair(marketCoin: MarketPair) = MarketPairDbEntity(
             id = marketCoin.id,
             tradePair = marketCoin.tradePair,
-            sourceName = marketCoin.sourceName
+            sourceName = marketCoin.sourceName,
+            ignoreWhenSaving = marketCoin.ignoreWhenSaving
         )
     }
 }

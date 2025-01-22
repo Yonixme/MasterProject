@@ -1,5 +1,6 @@
 package com.example.masterproject.model.database
 
+import androidx.room.AutoMigration
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import com.example.masterproject.model.marketpair.database.MarketPairDao
@@ -13,7 +14,12 @@ import com.example.masterproject.model.marketsnapshot.database.entities.MarketSn
     MarketPairDbEntity::class,
     MarketSnapshotDbEntity::class,
     MarketSnapshotDetailsDbEntity::class],
-    version = 1)
+    version = 2,
+    autoMigrations = [
+        AutoMigration(
+            from = 1,
+            to = 2)
+    ])
 abstract class AppDatabase : RoomDatabase() {
     abstract fun marketPairDao(): MarketPairDao
 
