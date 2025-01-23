@@ -18,7 +18,7 @@ val MainTabs = persistentListOf(
         graph = MainGraph
     ),
     AppTab(
-        iconRes = R.drawable.analitic_icon,
+        iconRes = R.drawable.trade_icon,
         labelRes = R.string.exchange_rate_short,
         graph = ExchangeRateGraphs
     ),

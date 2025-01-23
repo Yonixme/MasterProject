@@ -13,7 +13,9 @@ interface DBMarketSnapshotRepository {
 
     suspend fun getSnapshots(): List<MarketSnapshot>
 
-    suspend fun setDetailsForMarketSnapshot(id: Long, marketPairWithDetails: MarketPairWithDetails)
-
     suspend fun createSnapshotWithDetails(list: List<MarketPairWithDetails>)
+
+    suspend fun deleteSnapshotById(id: Long)
+
+    suspend fun clearTable()
 }

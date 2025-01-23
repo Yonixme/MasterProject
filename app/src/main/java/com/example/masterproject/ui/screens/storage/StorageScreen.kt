@@ -5,23 +5,38 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -41,7 +56,8 @@ import com.example.masterproject.ui.tools.formatUnixTimeMillis
 @Preview(showSystemUi = true)
 fun StorageScreenPreview(){
     StorageContent(
-        getScreenState = {ScreenState.Loading}
+        getScreenState = {ScreenState.Loading},
+        deleteSnapshot = { }
     )
 }
 
@@ -88,15 +104,18 @@ fun StorageScreen(
     }
 
     StorageContent(
-        getScreenState = {screenState.value}
+        getScreenState = {screenState.value},
+        deleteSnapshot = viewModel::deleteSnapshotById
     )
 }
 
 @Composable
 fun StorageContent(
-    getScreenState: () -> ScreenState
+    getScreenState: () -> ScreenState,
+    deleteSnapshot: (Long) -> Unit
 ) {
     val theme = LocalAppTheme.current
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -111,7 +130,11 @@ fun StorageContent(
         ) {
             when(val screenState = getScreenState()){
                 is ScreenState.Loading -> {
-
+                    CircularProgressIndicator(
+                        modifier = Modifier
+                            .align(alignment = Alignment.CenterHorizontally),
+                        color = theme.textColor
+                    )
                 }
                 is ScreenState.Success -> {
                     LazyColumn(
@@ -119,6 +142,7 @@ fun StorageContent(
                     ) {
                         items(screenState.marketSnapshots.size){index ->
                             //ContainerForData(it)
+                            var showDialog by remember { mutableStateOf(false) }
                             Card(
                                 modifier = Modifier
                                     .padding(horizontal = 8.dp, vertical = 16.dp)
@@ -134,13 +158,41 @@ fun StorageContent(
                                     horizontalAlignment = Alignment.CenterHorizontally,
                                     verticalArrangement = Arrangement.Center
                                 ){
-                                    Text(
-                                        text = "Data ${screenState.marketSnapshots[index].marketSnapshot.id}",
-                                        fontSize = 24.sp,
+                                    Box(
                                         modifier = Modifier
-                                            .wrapContentSize()
-                                            .padding(16.dp)
-                                    )
+                                            .fillMaxWidth(),
+                                        contentAlignment = Alignment.Center,
+                                    ) {
+                                        Text(
+                                            text = "Data ${screenState.marketSnapshots[index].marketSnapshot.id}",
+                                            fontSize = 24.sp
+                                        )
+                                        IconButton(
+                                            onClick = { showDialog = true },
+                                            modifier = Modifier
+                                                .align(Alignment.CenterEnd)
+                                                .padding(end = 8.dp)
+                                            ) {
+                                            Icon(
+                                                painter = painterResource(R.drawable.close_icon),
+                                                contentDescription = stringResource(R.string.close),
+                                                modifier = Modifier.size(20.dp),
+                                                tint = Color.Unspecified
+                                            )
+                                            ConfirmationDialog(
+                                                showDialog = showDialog,
+                                                onConfirm = {
+                                                    showDialog = false
+                                                    deleteSnapshot.invoke(screenState.marketSnapshots[index].marketSnapshot.id)
+                                                },
+                                                onDismiss = {
+                                                    showDialog = false
+                                                },
+                                                label = stringResource(R.string.delete_this_item_from_database)
+                                            )
+                                        }
+
+                                    }
                                     Text(
                                         text = "Time: ${formatUnixTimeMillis(screenState.marketSnapshots[index].marketSnapshot.time)}",
                                         fontSize = 20.sp,
@@ -165,14 +217,44 @@ fun StorageContent(
                                         }
                                     }
                                 }
-
                             }
                         }
                     }
                 }
-
             }
-
         }
+    }
+}
+
+@Composable
+fun ConfirmationDialog(
+    showDialog: Boolean,
+    label: String,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    val theme = LocalAppTheme.current
+    if (showDialog) {
+        AlertDialog(
+            onDismissRequest = onDismiss,
+            title = {
+                Text(text = "Apply")
+            },
+            text = {
+                Text(text = label)
+            },
+            confirmButton = {
+                TextButton(onClick = onConfirm) {
+                    Text(text = "Yes",
+                        color = theme.textColor)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = onDismiss) {
+                    Text(text = "No",
+                        color = theme.textColor)
+                }
+            }
+        )
     }
 }

@@ -41,21 +41,9 @@ class RoomMarketSnapshotRepository @Inject constructor(
             }
     }
 
-    override suspend fun setDetailsForMarketSnapshot(id : Long, marketPairWithDetails: MarketPairWithDetails) {
-        //val id = marketSnapshotDao.createMarketSnapshot(MarketSnapshotDbEntity.createSnapshot())
-        marketSnapshotDao.setDetailsForMarketSnapshot(
-            MarketSnapshotDetailsDbEntity(
-                id,
-                marketPairWithDetails.tradePair,
-                marketPairWithDetails.sourceName,
-                marketPairWithDetails.price
-            )
-        )
-    }
-
     override suspend fun createSnapshotWithDetails(list: List<MarketPairWithDetails>) {
         val snapshotId = createSnapshot()
-        marketSnapshotDao.setDetailsForMarketSnapshot1(
+        marketSnapshotDao.setDetailsForMarketSnapshot(
             List(list.size){
                 MarketSnapshotDetailsDbEntity(
                     snapshotId = snapshotId,
@@ -65,6 +53,14 @@ class RoomMarketSnapshotRepository @Inject constructor(
                 )
             }
         )
+    }
+
+    override suspend fun clearTable() {
+        marketSnapshotDao.clearTable()
+    }
+
+    override suspend fun deleteSnapshotById(id: Long) {
+        marketSnapshotDao.deleteSnapshotById(id)
     }
 
     private suspend fun createSnapshot(): Long{

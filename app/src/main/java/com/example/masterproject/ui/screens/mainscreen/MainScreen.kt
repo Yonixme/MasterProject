@@ -26,6 +26,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -36,6 +37,7 @@ import com.example.masterproject.ui.tools.LocalNavController
 import com.example.masterproject.ui.screens.ExchangeRateGraphs.ExchangeRateRoute
 import com.example.masterproject.ui.components.NavigateUpAction
 import com.example.masterproject.ui.screens.StrorageGraphs.StorageRoute
+import com.example.masterproject.ui.screens.exchangerate.ExchangeRateViewModel
 
 @Composable
 @Preview(showSystemUi = true)
@@ -55,6 +57,7 @@ fun MainScreen(
     val currentReturnTitle = rememberUpdatedState(returnTitle)
     val currentReturnNavigateUpAction = rememberUpdatedState(returnNavigateUpAction)
     val navController = LocalNavController.current
+    //val viewModel: ExchangeRateViewModel = hiltViewModel()
 
 
 //    LaunchedEffect(Unit) {

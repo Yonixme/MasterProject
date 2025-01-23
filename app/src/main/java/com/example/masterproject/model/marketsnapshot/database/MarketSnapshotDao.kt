@@ -2,6 +2,7 @@ package com.example.masterproject.model.marketsnapshot.database
 
 import androidx.room.Dao
 import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.example.masterproject.model.marketsnapshot.database.entities.MarketSnapshotDbEntity
 import com.example.masterproject.model.marketsnapshot.database.entities.MarketSnapshotDetailsDbEntity
@@ -22,30 +23,15 @@ interface MarketSnapshotDao {
     @Query("SELECT * FROM market_snapshots")
     fun getSnapshots(): List<MarketSnapshotDbEntity>
 
+    @Query("DELETE FROM market_snapshots WHERE id = :id")
+    suspend fun deleteSnapshotById(id: Long)
 
+    @Insert
+    suspend fun setDetailsForMarketSnapshot(list: List<MarketSnapshotDetailsDbEntity>)
 
     @Query("SELECT * FROM market_snapshots")
     fun getFlowSnapshots(): Flow<MarketSnapshotDbEntity>
 
-    @Insert
-    suspend fun setDetailsForMarketSnapshot1(list: List<MarketSnapshotDetailsDbEntity>)
-
-
-
-
-//    @Insert
-//    suspend fun insertAllDetailsForMarketSnapshot(list: List<MarketSnapshotDetailsDbEntity>)
-
-    //    @Insert
-//    suspend fun createMarketSnapshotDetails(marketSnapshotDetailsDbEntity: MarketSnapshotDetailsDbEntity)
-//
-//    @Query("SELECT * FROM market_snapshots")
-//    fun getAllMarketSnapshots(): Flow<List<MarketSnapshotDbEntity?>>
-
-//    @Query("SELECT * FROM market_snapshots WHERE id = :id")
-//    fun getMarketSnapshotByID(id: Long): Flow<MarketSnapshotDbEntity?>
-
-
-
-
+    @Query("DELETE FROM market_snapshots")
+    suspend fun clearTable()
 }

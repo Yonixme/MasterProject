@@ -24,4 +24,7 @@
     <string name="exchange_rate_short">Exch Rate</string>
     <string name="init_name_value_screen"> </string>
     <string name="feature_in_planning">This feature will be added in a future patch.</string>
+    <string name="close">close</string>
+    <string name="reset_all_data_in_database">Are You sure what You want to reset all data in database?</string>
+    <string name="delete_this_item_from_database">Are You sure what You want to delete this item from database?</string>
 </resources>

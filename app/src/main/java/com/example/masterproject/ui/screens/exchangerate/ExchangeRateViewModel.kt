@@ -4,11 +4,13 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.masterproject.model.marketpair.MarketPairRepository
 import com.example.masterproject.model.marketpair.entities.MarketPairWithDetails
+import com.example.masterproject.model.marketsnapshot.MarketSnapshotRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -17,6 +19,7 @@ import javax.inject.Inject
 @HiltViewModel
 class ExchangeRateViewModel @Inject constructor(
     private val marketPairRepository: MarketPairRepository,
+    private val marketSnapshotRepository: MarketSnapshotRepository
 ): ViewModel() {
     private var isUpdatingData = false
 
@@ -45,7 +48,7 @@ class ExchangeRateViewModel @Inject constructor(
         isUpdatingData = true
         viewModelScope.launch(Dispatchers.IO) {
             while (isUpdatingData){
-                marketPairRepository.updateMarketPairDetails()
+                marketPairRepository.updateListWithDetails()
 
                 delay(2000L)
             }
@@ -59,8 +62,9 @@ class ExchangeRateViewModel @Inject constructor(
 
     fun saveMarketSnapshot(){
         viewModelScope.launch(Dispatchers.IO) {
-            marketPairRepository.saveMarketSnapshot()
+            marketSnapshotRepository.saveMarketSnapshot(
+                marketPairRepository.getMarketPairWithDetailsList().first()
+            )
         }
-
     }
 }

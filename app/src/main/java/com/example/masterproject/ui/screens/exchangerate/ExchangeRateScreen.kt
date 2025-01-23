@@ -18,6 +18,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ProgressIndicatorDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -134,7 +135,11 @@ fun ExchangeRateContent(getScreenState: () -> ScreenState,
         ) {
             when(val screenState = getScreenState()){
                 ScreenState.Loading -> {
-                    CircularProgressIndicator(modifier = Modifier.align(alignment = Alignment.CenterHorizontally))
+                    CircularProgressIndicator(
+                        modifier = Modifier
+                            .align(alignment = Alignment.CenterHorizontally),
+                        color = theme.textColor
+                    )
                 }
                 is ScreenState.Success -> {
                     LazyColumn(modifier = Modifier.fillMaxSize()){

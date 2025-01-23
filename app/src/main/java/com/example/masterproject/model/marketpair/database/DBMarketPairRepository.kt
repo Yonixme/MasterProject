@@ -9,6 +9,10 @@ interface DBMarketPairRepository {
 
     suspend fun deleteMarketPair(id: Long)
 
-    suspend fun AddMarketPair(marketPair: MarketPair)
+    suspend fun addMarketPair(marketPair: MarketPair)
+
+    fun setIgnoreSavingFlagForMarketPair(marketPair: MarketPair)
+
+    suspend fun clearTable()
 
 }

@@ -1,6 +1,8 @@
 package com.example.masterproject.model.marketsnapshot
 
-import com.example.masterproject.model.database.DBRepositories
+import com.example.masterproject.model.marketpair.database.DBMarketPairRepository
+import com.example.masterproject.model.marketpair.entities.MarketPairWithDetails
+import com.example.masterproject.model.marketsnapshot.database.DBMarketSnapshotRepository
 import com.example.masterproject.model.marketsnapshot.entities.MarketSnapshotAndDetails
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -14,13 +16,11 @@ import javax.inject.Singleton
 
 @Singleton
 class MarketSnapshotRepository @Inject constructor(
-    private val dbRepositories: DBRepositories
+    private val dbMarketSnapshotRepository: DBMarketSnapshotRepository
 ) {
     private val customScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
-    private val _listMarketSnapshotDetails: MutableStateFlow<List<MarketSnapshotAndDetails>> = MutableStateFlow(
-        emptyList()
-    )
+    private val _listMarketSnapshotDetails: MutableStateFlow<List<MarketSnapshotAndDetails>?> = MutableStateFlow(null)
 
     init {
         customScope.launch {
@@ -30,11 +30,26 @@ class MarketSnapshotRepository @Inject constructor(
         }
     }
 
-    fun geListMarketSnapshotDetails(): Flow<List<MarketSnapshotAndDetails>> = _listMarketSnapshotDetails
+    suspend fun clearTable(){
+        dbMarketSnapshotRepository.clearTable()
+    }
 
+    suspend fun saveMarketSnapshot(list: List<MarketPairWithDetails>?){
+        if(list.isNullOrEmpty()) return
+        dbMarketSnapshotRepository.createSnapshotWithDetails(list = list)
+    }
+
+    fun geListMarketSnapshotDetails(): Flow<List<MarketSnapshotAndDetails>?> = _listMarketSnapshotDetails
+
+    suspend fun deleteSnapshotById(id: Long){
+        val listSnapshotWithDetails = _listMarketSnapshotDetails.value ?: emptyList()
+        val indexOfElement = listSnapshotWithDetails.indexOfFirst { it.marketSnapshot.id == id }
+        if (indexOfElement < 0) return
+
+        dbMarketSnapshotRepository.deleteSnapshotById(id)
+    }
 
     private fun queryMarketSnapshotDetails(): Flow<List<MarketSnapshotAndDetails>> {
-        return dbRepositories.roomMarketSnapshotRepository.getMarketSnapshotAndDetails()
-
+        return dbMarketSnapshotRepository.getMarketSnapshotAndDetails()
     }
 }

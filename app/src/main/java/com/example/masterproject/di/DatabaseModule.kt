@@ -4,8 +4,13 @@ import android.content.Context
 import androidx.room.Room
 import com.example.masterproject.model.database.AppDatabase
 import com.example.masterproject.model.database.DatabaseConfig
+import com.example.masterproject.model.marketpair.database.DBMarketPairRepository
 import com.example.masterproject.model.marketpair.database.MarketPairDao
+import com.example.masterproject.model.marketpair.database.RoomMarketPairRepository
+import com.example.masterproject.model.marketsnapshot.database.DBMarketSnapshotRepository
 import com.example.masterproject.model.marketsnapshot.database.MarketSnapshotDao
+import com.example.masterproject.model.marketsnapshot.database.RoomMarketSnapshotRepository
+import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -34,4 +39,5 @@ object DatabaseModule {
     fun provideMarketSnapshotDao(database: AppDatabase): MarketSnapshotDao{
         return database.marketSnapshotDao()
     }
+
 }

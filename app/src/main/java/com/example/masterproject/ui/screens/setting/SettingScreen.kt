@@ -30,6 +30,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -46,6 +47,7 @@ import com.example.masterproject.ui.components.custom.CustomButton
 import com.example.masterproject.ui.tools.LocalNavController
 import com.example.masterproject.ui.screens.MainGraph
 import com.example.masterproject.ui.components.NavigateUpAction
+import com.example.masterproject.ui.screens.storage.ConfirmationDialog
 
 @Composable
 @Preview(showSystemUi = true)
@@ -91,12 +93,7 @@ fun SettingScreen(
     }
 
     SettingContent(
-        resetClicked = {
-            Toast.makeText(context,
-                context.getString(R.string.feature_in_planning),
-                Toast.LENGTH_LONG)
-                .show()
-        }
+        resetClicked = viewModel::resetDatabase
     )
 
 }
@@ -112,6 +109,8 @@ fun SettingContent(resetClicked: () -> Unit){
     var useColorMode by remember { mutableStateOf(true) }
     var initIsDarkTheme by remember { mutableStateOf(theme == AppTheme.Dark) }
     var isDarkTheme by remember { mutableStateOf(initIsDarkTheme) }
+    var showDialog by remember { mutableStateOf(false) }
+
     Column(
         verticalArrangement = Arrangement.SpaceBetween,
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -199,58 +198,9 @@ fun SettingContent(resetClicked: () -> Unit){
                     }
                 }
             }
-
-            SettingField(text = "Delete item from Storage") {
-                Box(){
-                    Button(
-                        onClick = { showDeletingPopUp = true },
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = theme.primaryColor,
-                            contentColor = theme.textColor
-                        ),
-                        elevation = ButtonDefaults.elevatedButtonElevation(6.dp)
-                    ) {
-                        Text(
-                            text = "Choose"
-                        )
-                    }
-                    DropdownMenu(
-                        expanded = showDeletingPopUp,
-                        onDismissRequest = { showDeletingPopUp = false },
-                        containerColor = theme.primaryColor,
-                        shadowElevation = 3.dp
-                    ) {
-                        DropdownMenuItem(
-                            text = {
-                                Text(
-                                    text = "text",
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .align(Alignment.CenterHorizontally),
-                                    color = theme.textColor
-                                )
-                            },
-                            onClick = { },
-                            modifier = Modifier.align(Alignment.CenterHorizontally),
-                        )
-                        DropdownMenuItem(
-                            text = {
-                                Text(
-                                    text = "text2",
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .align(Alignment.CenterHorizontally)
-                                )
-                            },
-                            onClick = { }
-                        )
-                    }
-                }
-            }
-
             SettingField(text = "Reset Database") {
                 Button(
-                    onClick = {resetClicked.invoke()},
+                    onClick = {showDialog = true},
                     colors = ButtonDefaults.buttonColors(
                         containerColor = theme.primaryColor,
                         contentColor = theme.textColor
@@ -272,6 +222,17 @@ fun SettingContent(resetClicked: () -> Unit){
             }
         }
     }
+    ConfirmationDialog(
+        showDialog = showDialog,
+        onConfirm = {
+            showDialog = false
+            resetClicked()
+        },
+        onDismiss = {
+            showDialog = false
+        },
+        label = stringResource(R.string.reset_all_data_in_database)
+    )
 }
 
 @Composable

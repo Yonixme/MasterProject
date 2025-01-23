@@ -231,7 +231,8 @@ fun EditItemContent(
                     CircularProgressIndicator(
                         modifier = Modifier
                             .fillMaxSize()
-                            .padding(8.dp)
+                            .padding(8.dp),
+                        color = theme.textColor
                     )
                 }
             }

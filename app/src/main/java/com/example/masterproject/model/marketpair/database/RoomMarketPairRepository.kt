@@ -24,13 +24,21 @@ class RoomMarketPairRepository @Inject constructor(
             }
     }
 
+    override suspend fun clearTable() {
+        marketPairDao.clearTable()
+    }
+
     override suspend fun deleteMarketPair(id: Long) {
         marketPairDao.deletePairById(id)
     }
 
-    override suspend fun AddMarketPair(marketPair: MarketPair) {
+    override suspend fun addMarketPair(marketPair: MarketPair) {
         val addItem = MarketPairDbEntity.fromMarketPair(marketPair)
 
         marketPairDao.insertPair(addItem)
+    }
+
+    override fun setIgnoreSavingFlagForMarketPair(marketPair: MarketPair) {
+        marketPairDao.setIgnoreSavingFlagForMarketPair(MarketPairDbEntity.fromMarketPair(marketPair))
     }
 }

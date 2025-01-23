@@ -17,25 +17,24 @@ class RetrofitSymbolPriceSource @Inject constructor(
 ): BaseRetrofitSource(config), SymbolPriceSource {
     val symbolPriceApi = retrofit.create(SymbolPriceApi::class.java)
 
-    override suspend fun getSymbolPrice(listSymbols: List<String>): Map<String, Double> {
+    override suspend fun getSymbolPrice(listSymbols: List<String>): Map<String, Double> = wrapRetrofitExceptions {
         val listPriceResponseEntity = symbolPriceApi.getMarketPrice()
         val symbolAndPrices = mutableMapOf<String, Double>()
 
         for (symbol in listSymbols){
             symbolAndPrices[symbol] = listPriceResponseEntity.get(listPriceResponseEntity.indexOfFirst { it.symbol == symbol }).price
         }
-        return symbolAndPrices
+        return@wrapRetrofitExceptions symbolAndPrices
     }
 
 
-    override suspend fun getPriceAtTheStartDay(symbol: String): Map<String, Double> {
+    override suspend fun getPriceAtTheStartDay(symbol: String): Map<String, Double> = wrapRetrofitExceptions {
         val arraySymbolInformation =
             symbolPriceApi.getInfoForSymbolForDay(symbol)
-//        val price = listSymbolInformation[0].open.toDouble()
         val price = arraySymbolInformation[0][1].toString().toDouble()
 
         println("symbol123 = $symbol + price = $price")
-        return mapOf(symbol to price)
+        return@wrapRetrofitExceptions mapOf(symbol to price)
     }
 
 }

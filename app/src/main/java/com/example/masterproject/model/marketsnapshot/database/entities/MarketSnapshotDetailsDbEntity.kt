@@ -26,21 +26,3 @@ data class MarketSnapshotDetailsDbEntity(
     @ColumnInfo(name = "source_name", collate = ColumnInfo.NOCASE) val sourceName: String,
     val price: Double
     )
-//{
-//        fun toMarketSnapshotDetails(): MarketPairWithDetails = MarketPairWithDetails(
-//            id = snapshotId,
-//            tradePair = tradePair,
-//            sourceName = sourceName,
-//            price = price
-//        )
-//
-//        companion object{
-//            fun fromMarketSnapshotAndDetails(marketSnapshot: MarketSnapshot, marketPairWithDetails: MarketPairWithDetails): MarketSnapshotDetailsDbEntity = MarketSnapshotDetailsDbEntity(
-//                //snapshotId = marketSnapshot.id,
-//                snapshotId = marketSnapshot.id,
-//                tradePair = marketPairWithDetails.tradePair,
-//                sourceName = marketPairWithDetails.sourceName,
-//                price = marketPairWithDetails.price
-//            )
-//        }
-//}
