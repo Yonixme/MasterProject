@@ -32,8 +32,6 @@ class RetrofitSymbolPriceSource @Inject constructor(
         val arraySymbolInformation =
             symbolPriceApi.getInfoForSymbolForDay(symbol)
         val price = arraySymbolInformation[0][1].toString().toDouble()
-
-        println("symbol123 = $symbol + price = $price")
         return@wrapRetrofitExceptions mapOf(symbol to price)
     }
 

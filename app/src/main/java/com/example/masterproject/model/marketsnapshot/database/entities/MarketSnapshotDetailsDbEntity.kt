@@ -4,8 +4,6 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
-import com.example.masterproject.model.marketpair.entities.MarketPairWithDetails
-import com.example.masterproject.model.marketsnapshot.entities.MarketSnapshot
 
 @Entity(tableName = "market_pairs_snapshot_details",
     indices =[

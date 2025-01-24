@@ -3,7 +3,6 @@ package com.example.masterproject.model.marketpair
 import com.example.masterproject.model.marketpair.database.DBMarketPairRepository
 import com.example.masterproject.model.marketpair.entities.MarketPair
 import com.example.masterproject.model.marketpair.entities.MarketPairWithDetails
-import com.example.masterproject.model.marketsnapshot.database.DBMarketSnapshotRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -37,27 +36,67 @@ class MarketPairRepository @Inject constructor(
 
                 _listMarketPairs.value = mappedList
 
-                _listMarketPriceOnStartDay.value = mappedList.map {
-                        pairCoin ->
-                    val price = getPriceAtTheStartDay(pairCoin.tradePair).get(pairCoin.tradePair) ?: -1.0
-                    MarketPairWithDetails(
-                        id = pairCoin.id,
-                        tradePair = pairCoin.tradePair,
-                        sourceName = pairCoin.sourceName,
-                        price = price
-                    )
-                }
+                val pricesForListOnStartDay: MutableMap<String, Double> = mutableMapOf()
+                if (_listMarketPriceOnStartDay.value != null){
+                    val listAtTheStartDay = _listMarketPriceOnStartDay.first() ?: emptyList()
+                    val listOfUniqueElements = findUniqueElements(
+                        primaryList = listAtTheStartDay,
+                        keyList = mappedList,
+                        comparator = {marketPair, marketPairWithDetails ->
+                            marketPair.tradePair == marketPairWithDetails.tradePair &&
+                                    marketPair.sourceName == marketPairWithDetails.sourceName
+                        })
 
-                val prices = getMarketPrice()
-                _listMarketPairDetails.value = mappedList.map{
-                        pairCoin ->
-                    val price = prices[pairCoin.tradePair] ?: -1.0
-                    MarketPairWithDetails(
-                        id = pairCoin.id,
-                        tradePair = pairCoin.tradePair,
-                        sourceName = pairCoin.sourceName,
-                        price = price
-                    )
+                    var listDeleteElements: List<MarketPairWithDetails> = emptyList()
+                    for(item in listOfUniqueElements.second.toList()){
+                        listDeleteElements = listAtTheStartDay.filter{ it.id == item.id }
+                    }
+                    _listMarketPriceOnStartDay.update { it?.filterNot { item -> item in listDeleteElements.toSet() } }
+
+                    listOfUniqueElements.first.toList().forEach {
+                        pricesForListOnStartDay[it.tradePair] = getPriceAtTheStartDay(it.tradePair).get(it.tradePair) ?: -1.0
+                    }
+
+                    _listMarketPriceOnStartDay.update {
+                            currentList ->
+                        currentList?.map { pairCoin ->
+                            val updatedPrice = pricesForListOnStartDay[pairCoin.tradePair] ?: pairCoin.price
+                            pairCoin.copy(price = updatedPrice)
+                        }
+                    }
+                }else{
+                    mappedList.forEach {
+                        pricesForListOnStartDay[it.tradePair] = getPriceAtTheStartDay(it.tradePair).get(it.tradePair) ?: -1.0
+                    }
+                    _listMarketPriceOnStartDay.value = mappedList.map {
+                            pairCoin ->
+                        val price = pricesForListOnStartDay[pairCoin.tradePair] ?: -1.0
+                        pairCoin.toMarketPairWithDetails(price = price)
+                    }
+                }
+                val prices: Map<String, Double>
+                if (_listMarketPairDetails.value != null){
+                    val listMPWithDetails = _listMarketPairDetails.first() ?: emptyList()
+
+                    val listOfUniqueElements = findUniqueElements(
+                        primaryList = listMPWithDetails,
+                        keyList = mappedList,
+                        comparator = {marketPair, marketPairWithDetails ->
+                            marketPair.tradePair == marketPairWithDetails.tradePair &&
+                                    marketPair.sourceName == marketPairWithDetails.sourceName
+                        })
+
+                    if (listOfUniqueElements.first.toList().isEmpty() &&
+                        listOfUniqueElements.second.toList().isEmpty()){
+                        prices = getMarketPrice(true)
+                    }
+                }else{
+                    prices = getMarketPrice()
+                    _listMarketPairDetails.value = mappedList.map{
+                            pairCoin ->
+                        val price = prices[pairCoin.tradePair] ?: -1.0
+                        pairCoin.toMarketPairWithDetails(price = price)
+                    }
                 }
             }
         }
@@ -65,8 +104,12 @@ class MarketPairRepository @Inject constructor(
 
     suspend fun changeIgnoreFlagForMarketPair(id: Long){
         val marketPair = _listMarketPairs.value?.filter { id == it.id }
+        println("Debug1234 ${marketPair?.size}")
+
         if (!marketPair.isNullOrEmpty()) {
-            dbMarketPairRepository.setIgnoreSavingFlagForMarketPair(marketPair[0])
+            val newIgnoreValue = !marketPair[0].ignoreWhenSaving
+            val neededMarketPair = marketPair[0].copy(ignoreWhenSaving = newIgnoreValue)
+            dbMarketPairRepository.setIgnoreSavingFlagForMarketPair(neededMarketPair)
         }
     }
 
@@ -118,17 +161,24 @@ class MarketPairRepository @Inject constructor(
         }
     }
 
-    private suspend fun getMarketPrice(): Map<String, Double>{
+    private suspend fun getMarketPrice(getDefaultPrice: Boolean = false): Map<String, Double>{
         val pairs = _listMarketPairs.value?.map { it.tradePair } ?: emptyList()
-        if (pairs.isEmpty()) return mapOf()
-        val listPrice: List<Double> = try {
-            symbolPriceSource.getSymbolPrice(pairs).values.toList()
-        }catch (e: Exception){
-            List<Double>(pairs.size){ -1.0 }
-        }
         val symbolToPrice = mutableMapOf<String, Double>()
-        for (symbol in pairs){
-            symbolToPrice[symbol] = listPrice.get(pairs.indexOfFirst { it == symbol })
+        if (pairs.isEmpty()) return mapOf()
+
+        if (getDefaultPrice){
+            for (symbol in pairs){
+                symbolToPrice[symbol] = -1.0
+            }
+        } else {
+            val listPrice: List<Double> = try {
+                symbolPriceSource.getSymbolPrice(pairs).values.toList()
+            } catch (e: Exception) {
+                List<Double>(pairs.size) { -1.0 }
+            }
+            for (symbol in pairs) {
+                symbolToPrice[symbol] = listPrice.get(pairs.indexOfFirst { it == symbol })
+            }
         }
         return symbolToPrice.toMap()
     }
@@ -160,22 +210,12 @@ class MarketPairRepository @Inject constructor(
                         if (price < 0 ) {
                             price = getPriceAtTheStartDay(pairCoin.tradePair).get(pairCoin.tradePair) ?: -1.0
                         }
-                        MarketPairWithDetails(
-                            id = pairCoin.id,
-                            tradePair = pairCoin.tradePair,
-                            sourceName = pairCoin.sourceName,
-                            price = price
-                        )
+                        pairCoin.copy(price = price)
                     }
                 }
                 _listMarketPairDetails.value = _listMarketPairs.first()?.map{
                     val price = prices[it.tradePair] ?: -1.0
-                    MarketPairWithDetails(
-                        id = it.id,
-                        tradePair = it.tradePair,
-                        sourceName = it.sourceName,
-                        price = price
-                    )
+                    it.toMarketPairWithDetails(price = price)
                 }
             }else{
                 _listMarketPairDetails.update { currentList ->
@@ -186,5 +226,25 @@ class MarketPairRepository @Inject constructor(
                 }
             }
         }
+    }
+
+    private fun findUniqueElements(
+        primaryList: List<MarketPairWithDetails>,
+        keyList: List<MarketPair>,
+        comparator: (MarketPair, MarketPairWithDetails) -> Boolean
+    ): Pair<List<MarketPair>, List<MarketPair>> {
+        val addList: List<MarketPair> =
+            keyList.filter { item1 ->
+                primaryList.none { item2 ->
+                    comparator(item1, item2) } }
+
+        val deleteHelp: List<MarketPairWithDetails> =
+            primaryList.filterNot { item1 ->
+                keyList.any{ item2 -> comparator(item2, item1) } }
+
+        val deleteList = deleteHelp.map {
+            it.toMarketPair()
+        }
+        return addList to deleteList
     }
 }

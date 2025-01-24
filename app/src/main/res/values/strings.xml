@@ -27,4 +27,5 @@
     <string name="close">close</string>
     <string name="reset_all_data_in_database">Are You sure what You want to reset all data in database?</string>
     <string name="delete_this_item_from_database">Are You sure what You want to delete this item from database?</string>
+    <string name="selected">Selected</string>
 </resources>

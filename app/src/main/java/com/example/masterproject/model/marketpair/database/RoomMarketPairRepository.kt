@@ -39,6 +39,7 @@ class RoomMarketPairRepository @Inject constructor(
     }
 
     override fun setIgnoreSavingFlagForMarketPair(marketPair: MarketPair) {
+        val debug = MarketPairDbEntity.fromMarketPair(marketPair)
         marketPairDao.setIgnoreSavingFlagForMarketPair(MarketPairDbEntity.fromMarketPair(marketPair))
     }
 }

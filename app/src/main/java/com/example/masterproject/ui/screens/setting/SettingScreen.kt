@@ -10,17 +10,21 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -29,7 +33,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.motionEventSpy
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -47,12 +53,17 @@ import com.example.masterproject.ui.components.custom.CustomButton
 import com.example.masterproject.ui.tools.LocalNavController
 import com.example.masterproject.ui.screens.MainGraph
 import com.example.masterproject.ui.components.NavigateUpAction
+import com.example.masterproject.ui.screens.exchangerate.ExchangeRateViewModel.ScreenState
+import com.example.masterproject.ui.screens.setting.SettingViewModel.ScreenState.*
 import com.example.masterproject.ui.screens.storage.ConfirmationDialog
 
 @Composable
 @Preview(showSystemUi = true)
 fun SettingScreenPreview(){
-    SettingContent(resetClicked = { })
+    SettingContent(
+        resetClicked = { },
+        getScreenState = { Loading },
+        onChangeIgnoreValueClicked = { })
 }
 
 @Composable
@@ -65,6 +76,7 @@ fun SettingScreen(
     val viewModel: SettingViewModel = hiltViewModel()
     val context = LocalContext.current
     val navController = LocalNavController.current
+    val screenState = viewModel.stateFlow.collectAsState()
 
     val lifecycleOwner = LocalLifecycleOwner.current
 
@@ -93,14 +105,19 @@ fun SettingScreen(
     }
 
     SettingContent(
-        resetClicked = viewModel::resetDatabase
+        resetClicked = viewModel::resetDatabase,
+        getScreenState = {screenState.value},
+        onChangeIgnoreValueClicked = viewModel::changeFlagForMarketPair
     )
 
 }
 
 
 @Composable
-fun SettingContent(resetClicked: () -> Unit){
+fun SettingContent(resetClicked: () -> Unit,
+                   getScreenState: () -> SettingViewModel.ScreenState,
+                   onChangeIgnoreValueClicked: (Long) -> Unit
+){
     val theme = LocalAppTheme.current
     val themeController = LocalAppThemeController.current
 
@@ -165,36 +182,36 @@ fun SettingContent(resetClicked: () -> Unit){
                             text = "Choose"
                         )
                     }
-                    DropdownMenu(
-                        expanded = showSavingPopUp,
-                        onDismissRequest = { showSavingPopUp = false },
-                        containerColor = theme.primaryColor,
-                        shadowElevation = 3.dp
-                    ) {
-                        DropdownMenuItem(
-                            text = {
-                                Text(
-                                text = "text",
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .align(Alignment.CenterHorizontally),
-                                    color = theme.textColor
-                                )
-                                   },
-                            onClick = { },
-                            modifier = Modifier.align(Alignment.CenterHorizontally)
-                        )
-                        DropdownMenuItem(
-                            text = {
-                                Text(
-                                    text = "text2",
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .align(Alignment.CenterHorizontally)
-                                )
-                            },
-                            onClick = { }
-                        )
+                    when(val screenState = getScreenState()){
+                        is Loading -> {
+                            CircularProgressIndicator(
+                                color = theme.textColor
+                            )
+                        }
+                        is Success ->{
+                            DropdownMenu(
+                                expanded = showSavingPopUp,
+                                onDismissRequest = { showSavingPopUp = false },
+                                containerColor = theme.primaryColor,
+                                shadowElevation = 3.dp
+                            ) {
+                                screenState.pairCoins.forEach{
+                                    DropdownMenuItem(
+                                        onClick = { onChangeIgnoreValueClicked.invoke(it.id) },
+                                        text = { Text( text = it.tradePair) },
+                                        trailingIcon = {
+                                            if(it.ignoreWhenSaving) {
+                                                Icon(
+                                                    painter = painterResource(R.drawable.selected_icon),
+                                                    contentDescription = stringResource(R.string.selected),
+                                                    modifier = Modifier.size(20.dp)
+                                                )
+                                            }
+                                        }
+                                    )
+                                }
+                            }
+                        }
                     }
                 }
             }

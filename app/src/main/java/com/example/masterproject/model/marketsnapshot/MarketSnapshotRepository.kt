@@ -1,6 +1,6 @@
 package com.example.masterproject.model.marketsnapshot
 
-import com.example.masterproject.model.marketpair.database.DBMarketPairRepository
+import com.example.masterproject.model.marketpair.entities.MarketPair
 import com.example.masterproject.model.marketpair.entities.MarketPairWithDetails
 import com.example.masterproject.model.marketsnapshot.database.DBMarketSnapshotRepository
 import com.example.masterproject.model.marketsnapshot.entities.MarketSnapshotAndDetails
@@ -34,9 +34,15 @@ class MarketSnapshotRepository @Inject constructor(
         dbMarketSnapshotRepository.clearTable()
     }
 
-    suspend fun saveMarketSnapshot(list: List<MarketPairWithDetails>?){
-        if(list.isNullOrEmpty()) return
-        dbMarketSnapshotRepository.createSnapshotWithDetails(list = list)
+    suspend fun saveMarketSnapshot(listWithDetails: List<MarketPairWithDetails>?, listMarketPair: List<MarketPair>?){
+        if(listWithDetails.isNullOrEmpty() && listMarketPair.isNullOrEmpty()) return
+        val correctedList = mutableListOf<MarketPairWithDetails>()
+
+        for (marketPair in listMarketPair!!){
+            correctedList += listWithDetails!!.filter { it.id == marketPair.id && !marketPair.ignoreWhenSaving}
+        }
+        if (correctedList.isEmpty()) return
+        dbMarketSnapshotRepository.createSnapshotWithDetails(list = correctedList.toList())
     }
 
     fun geListMarketSnapshotDetails(): Flow<List<MarketSnapshotAndDetails>?> = _listMarketSnapshotDetails

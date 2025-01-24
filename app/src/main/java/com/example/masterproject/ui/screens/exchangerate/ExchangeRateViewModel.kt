@@ -24,7 +24,6 @@ class ExchangeRateViewModel @Inject constructor(
     private var isUpdatingData = false
 
     val stateFlow: StateFlow<ScreenState> = marketPairRepository.getMarketPairWithDetailsList()
-        //.map (ScreenState::Success)
         .map {
             if (it != null)
                 ScreenState.Success(it)
@@ -63,7 +62,8 @@ class ExchangeRateViewModel @Inject constructor(
     fun saveMarketSnapshot(){
         viewModelScope.launch(Dispatchers.IO) {
             marketSnapshotRepository.saveMarketSnapshot(
-                marketPairRepository.getMarketPairWithDetailsList().first()
+                listWithDetails = marketPairRepository.getMarketPairWithDetailsList().first(),
+                listMarketPair = marketPairRepository.getMarketPair().first()
             )
         }
     }
