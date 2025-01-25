@@ -3,13 +3,11 @@ package com.example.masterproject.ui.screens.exchangerate
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -18,7 +16,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ProgressIndicatorDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -26,7 +23,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -37,6 +33,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.example.masterproject.R
+import com.example.masterproject.ui.components.LocalAppMode
 import com.example.masterproject.ui.components.LocalAppTheme
 import com.example.masterproject.ui.tools.LocalNavController
 import com.example.masterproject.ui.screens.exchangerate.ExchangeRateViewModel.*
@@ -51,7 +48,9 @@ fun ExchangeRateScreenPreview(){
     ExchangeRateContent(
         onEditItemListScreen = { },
         getScreenState = { ScreenState.Loading },
-        onSaveClicked = { })
+        onSaveClicked = { },
+        getComparedMap = { mapOf() }
+    )
 }
 
 @Composable
@@ -63,14 +62,15 @@ fun ExchangeRateScreen(
     val currentReturnNavigateUpAction = rememberUpdatedState(returnNavigateUpAction)
     val viewModel: ExchangeRateViewModel = hiltViewModel()
     val navController = LocalNavController.current
-    val screenState = viewModel.stateFlow.collectAsState()
+    val screenState = viewModel.marketPairsFlow.collectAsState()
     val context = LocalContext.current
 
 
     ExchangeRateContent(
         getScreenState = {screenState.value},
         onEditItemListScreen = { navController.navigate(EditRoute)},
-        onSaveClicked = { viewModel.saveMarketSnapshot() }
+        onSaveClicked = { viewModel.saveMarketSnapshot() },
+        getComparedMap = {viewModel.comparedPrice.value}
     )
 
 
@@ -97,6 +97,10 @@ fun ExchangeRateScreen(
                             }
                         ))
                 }
+
+                Lifecycle.Event.ON_DESTROY -> {
+                    viewModel.stopUpDatingCoinPrice()
+                }
                 //}
                 else -> {}
             }
@@ -105,16 +109,18 @@ fun ExchangeRateScreen(
         lifecycleOwner.lifecycle.addObserver(observer)
         onDispose {
             lifecycleOwner.lifecycle.removeObserver(observer)
-            viewModel.stopUpDatingCoinPrice()
+
         }
     }
 }
 
 @Composable
 fun ExchangeRateContent(getScreenState: () -> ScreenState,
+                        getComparedMap: () -> Map<Long, Boolean>,
                         onEditItemListScreen: () -> Unit,
                         onSaveClicked: () -> Unit) {
     val theme = LocalAppTheme.current
+    val colorMode = LocalAppMode.current
     Column (
         modifier = Modifier
             .fillMaxSize()
@@ -160,7 +166,16 @@ fun ExchangeRateContent(getScreenState: () -> ScreenState,
                                     text = if(it.price >= 0 )it.price.toString() else "",
                                     modifier = Modifier
                                         .padding(horizontal = 16.dp),
-                                    fontSize = 25.sp
+                                    fontSize = 25.sp,
+                                    color = if (colorMode.colorModeEnabled){
+                                        if (getComparedMap.invoke()[it.id] == true){
+                                            theme.upperTextColor
+                                        }else{
+                                            theme.lowerTextColor
+                                        }
+                                    }else{
+                                        theme.textColor
+                                    }
                                 )
                             }
                         }
@@ -177,40 +192,3 @@ fun ExchangeRateContent(getScreenState: () -> ScreenState,
         }
     }
 }
-
-
-
-/*@Composable
-fun ExchangeRateScreen(){
-    val viewModel: ExchangeRateViewModel = hiltViewModel()
-    val navController = LocalNavController.current
-    val screenState = viewModel.stateFlow.collectAsState()
-
-    ExchangeRateContent(
-        getScreenState = {screenState.value},
-        onMainScreen = { navController.navigate(MainRoute)},
-        onSettingScreen = { navController.navigate(AppSettingRoute)},
-        onStorageScreen = { navController.navigate(StorageRoute)},
-        onEditItemListScreen = { navController.navigate(EditRoute)}
-    )
-
-    val lifecycleOwner = LocalLifecycleOwner.current
-
-    DisposableEffect(lifecycleOwner) {
-        val observer = LifecycleEventObserver { _, event ->
-            when (event) {
-                Lifecycle.Event.ON_CREATE -> {
-                    viewModel.startUpdatingCoinPrice()
-                }
-
-                else -> {}
-            }
-        }
-
-        lifecycleOwner.lifecycle.addObserver(observer)
-        onDispose {
-            lifecycleOwner.lifecycle.removeObserver(observer)
-            viewModel.stopUpDatingCoinPrice()
-        }
-    }
-}*/

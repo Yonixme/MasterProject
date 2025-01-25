@@ -1,7 +1,6 @@
 package com.example.masterproject.ui.theme
 
 import androidx.compose.ui.graphics.Color
-import kotlin.io.encoding.Base64
 
 val Purple80 = Color(0xFFD0BCFF)
 val PurpleGrey80 = Color(0xFFCCC2DC)
@@ -26,5 +25,8 @@ val primaryColorDark = Color(0xFFBDBDBD)
 val secondaryColorDark = Color(0xFFB4B4B4)
 val textColorDark = Color.Black
 
-val TextColorUpperThanDP = Color(0xFF0F7512)
-val TextColorLowerThanDP = Color(0xFFEA2626)
+val TextColorUpperThanDPLight = Color(0xFF0F7512)
+val TextColorLowerThanDPLight = Color(0xFFEA2626)
+
+val TextColorUpperThanDPDark = Color(0xFF0F7512)
+val TextColorLowerThanDPDark = Color(0xFFEA2626)

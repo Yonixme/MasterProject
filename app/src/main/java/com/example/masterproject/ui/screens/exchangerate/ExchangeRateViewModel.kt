@@ -8,6 +8,7 @@ import com.example.masterproject.model.marketsnapshot.MarketSnapshotRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
@@ -23,10 +24,14 @@ class ExchangeRateViewModel @Inject constructor(
 ): ViewModel() {
     private var isUpdatingData = false
 
-    val stateFlow: StateFlow<ScreenState> = marketPairRepository.getMarketPairWithDetailsList()
+    val comparedPrice: MutableStateFlow<Map<Long, Boolean>> = MutableStateFlow(mapOf())
+
+    val marketPairsFlow: StateFlow<ScreenState> = marketPairRepository.getMarketPairWithDetailsList()
         .map {
-            if (it != null)
+            if (it != null) {
+                comparedPrice.value = compareWithStartPrice()
                 ScreenState.Success(it)
+            }
             else
                 ScreenState.Loading
         }
@@ -67,4 +72,9 @@ class ExchangeRateViewModel @Inject constructor(
             )
         }
     }
+
+    private fun compareWithStartPrice(): Map<Long, Boolean>{
+       return marketPairRepository.comparePriceUpperThanStartDay()
+    }
+
 }

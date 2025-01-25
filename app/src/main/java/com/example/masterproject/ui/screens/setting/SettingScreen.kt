@@ -1,6 +1,5 @@
 package com.example.masterproject.ui.screens.setting
 
-import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -32,9 +31,6 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.pointer.motionEventSpy
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -46,14 +42,16 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.example.masterproject.R
+import com.example.masterproject.model.config.colormode.ColorMode
 import com.example.masterproject.model.config.theme.AppTheme
+import com.example.masterproject.ui.components.LocalAppMode
+import com.example.masterproject.ui.components.LocalAppModeController
 import com.example.masterproject.ui.components.LocalAppTheme
 import com.example.masterproject.ui.components.LocalAppThemeController
 import com.example.masterproject.ui.components.custom.CustomButton
 import com.example.masterproject.ui.tools.LocalNavController
 import com.example.masterproject.ui.screens.MainGraph
 import com.example.masterproject.ui.components.NavigateUpAction
-import com.example.masterproject.ui.screens.exchangerate.ExchangeRateViewModel.ScreenState
 import com.example.masterproject.ui.screens.setting.SettingViewModel.ScreenState.*
 import com.example.masterproject.ui.screens.storage.ConfirmationDialog
 
@@ -74,7 +72,6 @@ fun SettingScreen(
     val currentReturnTitle = rememberUpdatedState(returnTitle)
     val currentReturnNavigateUpAction = rememberUpdatedState(returnNavigateUpAction)
     val viewModel: SettingViewModel = hiltViewModel()
-    val context = LocalContext.current
     val navController = LocalNavController.current
     val screenState = viewModel.stateFlow.collectAsState()
 
@@ -119,13 +116,19 @@ fun SettingContent(resetClicked: () -> Unit,
                    onChangeIgnoreValueClicked: (Long) -> Unit
 ){
     val theme = LocalAppTheme.current
+    val colorMode = LocalAppMode.current
+
     val themeController = LocalAppThemeController.current
+    val modeController = LocalAppModeController.current
 
     var showSavingPopUp by remember { mutableStateOf(false) }
-    var showDeletingPopUp by remember { mutableStateOf(false) }
-    var useColorMode by remember { mutableStateOf(true) }
+
     var initIsDarkTheme by remember { mutableStateOf(theme == AppTheme.Dark) }
     var isDarkTheme by remember { mutableStateOf(initIsDarkTheme) }
+
+    var initIsEnabledMode by remember { mutableStateOf(colorMode == ColorMode.Enabled) }
+    var isEnabledColorMode by remember { mutableStateOf(initIsEnabledMode) }
+
     var showDialog by remember { mutableStateOf(false) }
 
     Column(
@@ -158,8 +161,8 @@ fun SettingContent(resetClicked: () -> Unit,
             }
             SettingField(text = "Color Mode") {
                 Checkbox(
-                    checked = useColorMode,
-                    onCheckedChange = {useColorMode = !useColorMode},
+                    checked = isEnabledColorMode,
+                    onCheckedChange = {isEnabledColorMode = !isEnabledColorMode},
                     colors = CheckboxDefaults.colors(
                         checkedColor = theme.primaryColor,
                         uncheckedColor = theme.primaryColor,
@@ -193,7 +196,8 @@ fun SettingContent(resetClicked: () -> Unit,
                                 expanded = showSavingPopUp,
                                 onDismissRequest = { showSavingPopUp = false },
                                 containerColor = theme.primaryColor,
-                                shadowElevation = 3.dp
+                                shadowElevation = 3.dp,
+                                modifier = Modifier.fillMaxHeight(0.33f)
                             ) {
                                 screenState.pairCoins.forEach{
                                     DropdownMenuItem(
@@ -236,6 +240,10 @@ fun SettingContent(resetClicked: () -> Unit,
             if (isDarkTheme != initIsDarkTheme){
                 themeController.toggle()
                 initIsDarkTheme = isDarkTheme
+            }
+            if(isEnabledColorMode != initIsEnabledMode){
+                modeController.toggle()
+                initIsEnabledMode = isEnabledColorMode
             }
         }
     }

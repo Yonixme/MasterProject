@@ -16,14 +16,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
 import com.example.masterproject.ui.components.AppNavigationBar
-import com.example.masterproject.ui.components.AppThemeContainer
+import com.example.masterproject.ui.components.AppConfigContainer
 import com.example.masterproject.ui.screens.AppSettingGraphs
 import com.example.masterproject.ui.screens.AppSettingGraphs.AppSettingRoute
 import com.example.masterproject.ui.tools.LocalNavController
@@ -54,7 +53,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            AppThemeContainer {
+            AppConfigContainer {
                 ExcApp()
             }
         }

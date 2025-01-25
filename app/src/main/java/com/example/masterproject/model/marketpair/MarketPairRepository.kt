@@ -1,11 +1,14 @@
 package com.example.masterproject.model.marketpair
 
+import androidx.compose.ui.res.stringArrayResource
 import com.example.masterproject.model.marketpair.database.DBMarketPairRepository
 import com.example.masterproject.model.marketpair.entities.MarketPair
 import com.example.masterproject.model.marketpair.entities.MarketPairWithDetails
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
@@ -46,7 +49,6 @@ class MarketPairRepository @Inject constructor(
                             marketPair.tradePair == marketPairWithDetails.tradePair &&
                                     marketPair.sourceName == marketPairWithDetails.sourceName
                         })
-
                     var listDeleteElements: List<MarketPairWithDetails> = emptyList()
                     for(item in listOfUniqueElements.second.toList()){
                         listDeleteElements = listAtTheStartDay.filter{ it.id == item.id }
@@ -56,7 +58,6 @@ class MarketPairRepository @Inject constructor(
                     listOfUniqueElements.first.toList().forEach {
                         pricesForListOnStartDay[it.tradePair] = getPriceAtTheStartDay(it.tradePair).get(it.tradePair) ?: -1.0
                     }
-
                     _listMarketPriceOnStartDay.update {
                             currentList ->
                         currentList?.map { pairCoin ->
@@ -65,15 +66,19 @@ class MarketPairRepository @Inject constructor(
                         }
                     }
                 }else{
-                    mappedList.forEach {
-                        pricesForListOnStartDay[it.tradePair] = getPriceAtTheStartDay(it.tradePair).get(it.tradePair) ?: -1.0
+                    coroutineScope {
+                        mappedList.forEach {
+                            launch { pricesForListOnStartDay[it.tradePair] = getPriceAtTheStartDay(it.tradePair).get(it.tradePair) ?: -1.0 }
+                        }
                     }
+
                     _listMarketPriceOnStartDay.value = mappedList.map {
                             pairCoin ->
                         val price = pricesForListOnStartDay[pairCoin.tradePair] ?: -1.0
                         pairCoin.toMarketPairWithDetails(price = price)
                     }
                 }
+
                 val prices: Map<String, Double>
                 if (_listMarketPairDetails.value != null){
                     val listMPWithDetails = _listMarketPairDetails.first() ?: emptyList()
@@ -159,6 +164,28 @@ class MarketPairRepository @Inject constructor(
                 pairCoin.copy(price = -1.0)
             }
         }
+    }
+
+    fun comparePriceUpperThanStartDay(): Map<Long, Boolean>{
+        val currentList = _listMarketPairDetails.value ?: emptyList()
+        val atTheStartDay = _listMarketPriceOnStartDay.value ?: emptyList()
+        if (currentList.isEmpty() || atTheStartDay.isEmpty()) return mapOf()
+
+        val currentPriceMap: MutableMap<Long, Double> = mutableMapOf()
+        currentList.forEach(){
+            currentPriceMap[it.id] = it.price
+        }
+
+        val atTheStartDayPriceMap: MutableMap<Long, Double> = mutableMapOf()
+            atTheStartDay.forEach {
+                atTheStartDayPriceMap[it.id] = it.price
+            }
+
+        val comparedPriceMap: MutableMap<Long, Boolean> = mutableMapOf()
+        currentPriceMap.forEach {id, price ->
+            comparedPriceMap[id] = price > (atTheStartDayPriceMap[id] ?: -1.0)
+        }
+        return comparedPriceMap
     }
 
     private suspend fun getMarketPrice(getDefaultPrice: Boolean = false): Map<String, Double>{
