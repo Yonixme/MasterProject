@@ -1,12 +1,10 @@
 package com.example.masterproject.model.marketpair
 
-import androidx.compose.ui.res.stringArrayResource
 import com.example.masterproject.model.marketpair.database.DBMarketPairRepository
 import com.example.masterproject.model.marketpair.entities.MarketPair
 import com.example.masterproject.model.marketpair.entities.MarketPairWithDetails
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
@@ -130,9 +128,10 @@ class MarketPairRepository @Inject constructor(
 
     //Add pair in DB
     suspend fun addPairInList(pair: String, sourceName: String){
+        val correctPair = pair.trim().uppercase()
         dbMarketPairRepository.addMarketPair(MarketPair(
             0,
-            tradePair = pair,
+            tradePair = correctPair,
             sourceName = sourceName,
             ignoreWhenSaving = false
         ))
@@ -152,7 +151,7 @@ class MarketPairRepository @Inject constructor(
     }
 
     fun getIdForPair(pair: String): Long{
-        val listMarketPairDetailsCoin = _listMarketPairDetails.value?.filter { it.tradePair == pair }
+        val listMarketPairDetailsCoin = _listMarketPairDetails.value?.filter { it.tradePair.equals(pair, ignoreCase = true)}
 
         return if (!listMarketPairDetailsCoin.isNullOrEmpty()) listMarketPairDetailsCoin[0].id else -1
     }
@@ -177,6 +176,7 @@ class MarketPairRepository @Inject constructor(
         }
 
         val atTheStartDayPriceMap: MutableMap<Long, Double> = mutableMapOf()
+        
             atTheStartDay.forEach {
                 atTheStartDayPriceMap[it.id] = it.price
             }

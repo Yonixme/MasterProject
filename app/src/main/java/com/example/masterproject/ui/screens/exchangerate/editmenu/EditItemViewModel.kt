@@ -1,5 +1,6 @@
 package com.example.masterproject.ui.screens.exchangerate.editmenu
 
+import androidx.compose.ui.text.toUpperCase
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.masterproject.model.marketpair.MarketPairRepository
@@ -26,7 +27,7 @@ class EditItemViewModel @Inject constructor(
     fun addPair(pair: String){
         viewModelScope.launch {
             _stateFlow.update { it.copy(isEditInProgress = true) }
-            pairsCoinsRepository.addPairInList(pair, sourceName = "Binance")
+            pairsCoinsRepository.addPairInList(pair = pair, sourceName = "Binance")
             _exitChannel.send(Unit)
         }
     }
