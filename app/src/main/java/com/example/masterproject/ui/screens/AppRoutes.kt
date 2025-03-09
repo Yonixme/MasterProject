@@ -21,7 +21,7 @@ data object ExchangeRateGraphs{
 }
 
 @Serializable
-data object StrorageGraphs{
+data object StorageGraphs{
     @Serializable
     data object StorageRoute
 }
@@ -32,14 +32,6 @@ data object AppSettingGraphs{
     data object AppSettingRoute
 }
 
-
-
-
-
-@Serializable
-data object SettingRoute
-
-//const val ForecastFromGPTRoute = "forecast"
 
 fun NavBackStackEntry?.routeClass(): KClass<*>?{
     return this?.destination?.routeClass()

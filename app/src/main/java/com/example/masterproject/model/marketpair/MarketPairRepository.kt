@@ -176,7 +176,6 @@ class MarketPairRepository @Inject constructor(
         }
 
         val atTheStartDayPriceMap: MutableMap<Long, Double> = mutableMapOf()
-        
             atTheStartDay.forEach {
                 atTheStartDayPriceMap[it.id] = it.price
             }

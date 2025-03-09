@@ -10,7 +10,7 @@ import dagger.Provides
 import kotlinx.coroutines.flow.Flow
 
 @Dao
-interface MarketPairDao {
+interface MarketPairDao{
     @Insert
     suspend fun insertPair(marketPair: MarketPairDbEntity)
 

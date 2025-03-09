@@ -25,7 +25,7 @@ val MainTabs = persistentListOf(
     AppTab(
         iconRes = R.drawable.storage_icon,
         labelRes = R.string.storage,
-        graph = StrorageGraphs
+        graph = StorageGraphs
     ),
     AppTab(
         iconRes = R.drawable.setting_icon,

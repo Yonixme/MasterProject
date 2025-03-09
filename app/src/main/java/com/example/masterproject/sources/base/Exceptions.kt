@@ -1,4 +1,4 @@
-package com.example.masterproject.model
+package com.example.masterproject.sources.base
 
 open class AppException : RuntimeException{
     constructor() : super()

@@ -1,14 +1,9 @@
 package com.example.masterproject.sources.base
 
-import com.example.masterproject.model.AppException
-import com.example.masterproject.model.BackendException
-import com.example.masterproject.model.ConnectionException
-import com.example.masterproject.model.ParseBackendResponseException
 import com.squareup.moshi.JsonDataException
 import com.squareup.moshi.JsonEncodingException
 import retrofit2.HttpException
 import java.io.IOException
-import java.sql.Blob
 
 open class BaseRetrofitSource(
     retrofitConfig: RetrofitConfig
